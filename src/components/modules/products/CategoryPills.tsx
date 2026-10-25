@@ -1,0 +1,93 @@
+"use client";
+
+import * as React from "react";
+import { useFilterStore } from "@/store/useFilterStore";
+import { CATEGORIES } from "@/constants/mock-products";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+export function CategoryPills() {
+  const { selectedCategory, setSelectedCategory } = useFilterStore();
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(true);
+
+  const checkScroll = () => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      setCanScrollLeft(el.scrollLeft > 10);
+      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+    }
+  };
+
+  React.useEffect(() => {
+    checkScroll();
+    window.addEventListener("resize", checkScroll);
+    return () => window.removeEventListener("resize", checkScroll);
+  }, []);
+
+  const handleScroll = (direction: "left" | "right") => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      const scrollAmount = direction === "left" ? -240 : 240;
+      el.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      setTimeout(checkScroll, 300);
+    }
+  };
+
+  return (
+    <div className="relative w-full py-2">
+      {/* Scroll Left Button (desktop) */}
+      {canScrollLeft && (
+        <button
+          type="button"
+          aria-label="Scroll left"
+          onClick={() => handleScroll("left")}
+          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-md border border-slate-200 text-slate-600 hover:text-[#FF6F0F] hover:bg-orange-50 transition-all cursor-pointer"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Categories Horizontal Track */}
+      <div
+        ref={scrollContainerRef}
+        onScroll={checkScroll}
+        className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth px-1 py-1"
+      >
+        {CATEGORIES.map((cat) => {
+          const isSelected =
+            selectedCategory === cat.name ||
+            (selectedCategory === "সকল" && cat.id === "all");
+
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setSelectedCategory(cat.name)}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
+                isSelected
+                  ? "bg-[#FF6F0F] text-white shadow-sm shadow-orange-500/20 font-semibold scale-[1.02]"
+                  : "bg-white text-slate-700 border border-slate-200/90 hover:border-orange-300 hover:bg-orange-50/50 hover:text-slate-900 shadow-2xs"
+              }`}
+            >
+              <span className="text-sm leading-none">{cat.emoji}</span>
+              <span>{cat.name}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Scroll Right Button (desktop) */}
+      {canScrollRight && (
+        <button
+          type="button"
+          aria-label="Scroll right"
+          onClick={() => handleScroll("right")}
+          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-md border border-slate-200 text-slate-600 hover:text-[#FF6F0F] hover:bg-orange-50 transition-all cursor-pointer"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+}
