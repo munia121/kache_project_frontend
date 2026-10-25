@@ -2,11 +2,32 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Product } from "@/types/product.types";
+import Link from "next/link";
+import { IProduct } from "@/types/product.types";
 import { MapPin, Heart, MessageCircle } from "lucide-react";
 
 interface ProductCardProps {
-  product: Product;
+  product: IProduct;
+}
+
+function formatTimeAgo(dateString?: string): string {
+  if (!dateString) return "আজ";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "আজ";
+    const now = new Date();
+    const diffSecs = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffSecs < 60) return "এইমাত্র";
+    const diffMins = Math.floor(diffSecs / 60);
+    if (diffMins < 60) return `${diffMins} মি. আগে`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} ঘণ্টা আগে`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} দিন আগে`;
+    return date.toLocaleDateString("bn-BD", { month: "short", day: "numeric" });
+  } catch {
+    return "আজ";
+  }
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -25,15 +46,55 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  // Image resolution
+  const displayImage =
+    (product.images && product.images.length > 0 && product.images[0]) ||
+    product.imageUrl ||
+    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80";
+
   // Format currency with standard commas: ৳ 68,000
-  const formattedPrice = `৳ ${product.price.toLocaleString("en-IN")}`;
+  const formattedPrice = `৳ ${Number(product.price || 0).toLocaleString("en-IN")}`;
+
+  // Area resolution
+  const areaName =
+    typeof product.area === "object" && product.area !== null
+      ? product.area.bnName || product.area.name
+      : typeof product.area === "string"
+      ? product.area
+      : product.location || "ঢাকা";
+
+  // Category name resolution
+  const categoryLabel =
+    typeof product.category === "object" && product.category !== null
+      ? product.category.name
+      : typeof product.category === "string"
+      ? product.category
+      : product.categoryName || "সাধারণ";
+
+  // Time label
+  const timeLabel = product.timeAgo || formatTimeAgo(product.createdAt);
+
+  // Condition in Bengali
+  const conditionLabel =
+    product.condition === "NEW"
+      ? "নতুন"
+      : product.condition === "REFURBISHED"
+      ? "রিফার্বিশড"
+      : product.condition === "USED"
+      ? "ব্যবহৃত"
+      : product.condition;
+
+  const productSlug = product.slug || product.id;
 
   return (
-    <article className="group flex flex-col bg-white rounded-2xl border border-slate-100 hover:border-orange-200/80 p-2.5 sm:p-3 shadow-2xs hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden">
+    <Link
+      href={`/products/${productSlug}`}
+      className="group flex flex-col bg-white rounded-2xl border border-slate-100 hover:border-orange-200/80 p-2.5 sm:p-3 shadow-2xs hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden"
+    >
       {/* 1:1 Aspect Ratio Image Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-100 mb-2.5">
         <Image
-          src={product.imageUrl}
+          src={displayImage}
           alt={product.title}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
@@ -42,10 +103,10 @@ export function ProductCard({ product }: ProductCardProps) {
         />
 
         {/* Condition / Negotiable Badge */}
-        {product.condition && (
+        {conditionLabel && (
           <div className="absolute top-2 left-2 z-10">
             <span className="inline-block px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-black/60 backdrop-blur-xs text-white rounded-md">
-              {product.condition}
+              {conditionLabel}
             </span>
           </div>
         )}
@@ -69,7 +130,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Category Badge on Bottom Left of Image */}
         <div className="absolute bottom-2 left-2 z-10">
           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-white/90 backdrop-blur-xs text-slate-700 rounded-md border border-slate-200/50 shadow-2xs">
-            {product.categoryName}
+            {categoryLabel}
           </span>
         </div>
       </div>
@@ -88,10 +149,10 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center text-[11px] sm:text-xs text-slate-500 gap-1 truncate">
           <MapPin className="h-3.5 w-3.5 text-[#FF6F0F] shrink-0" />
           <span className="font-medium text-slate-600 truncate">
-            {product.area}
+            {areaName}
           </span>
           <span className="text-slate-300">•</span>
-          <span className="text-slate-400 shrink-0">{product.timeAgo}</span>
+          <span className="text-slate-400 shrink-0">{timeLabel}</span>
         </div>
 
         {/* Price & Engagement Footer */}
@@ -130,6 +191,8 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
+
+export default ProductCard;

@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   ApiResponse,
   BecomeSellerPayload,
@@ -18,10 +19,13 @@ export const userService = {
   },
 
   /**
-   * Update authenticated user's profile information (fullName, avatar, areaId, address)
+   * Update authenticated user's profile information (fullName, phone, areaId, address, role, shopName, bio)
    */
   async updateProfile(payload: UpdateProfilePayload): Promise<ApiResponse<IUser>> {
     const response = await apiClient.patch<ApiResponse<IUser>>("/users/profile", payload);
+    if (response.data?.success && response.data?.data) {
+      useAuthStore.getState().setUser(response.data.data);
+    }
     return response.data;
   },
 

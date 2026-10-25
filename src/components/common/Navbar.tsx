@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import * as React from "react";
@@ -42,6 +43,38 @@ export function Navbar() {
     setIsLocationModalOpen,
   } = useFilterStore();
 
+  const [searchInput, setSearchInput] = React.useState(searchQuery);
+
+  // Sync search input if searchQuery changes from outside (e.g. filter reset)
+  React.useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
+
+  // 300ms debounce before setting the search query in filter store
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== searchQuery) {
+        setSearchQuery(searchInput);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, searchQuery, setSearchQuery]);
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = searchInput.trim();
+    setSearchQuery(trimmed);
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      router.push("/");
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setSearchQuery("");
+  };
+
   const {
     user,
     isAuthenticated,
@@ -67,7 +100,7 @@ export function Navbar() {
       return (first + last).toUpperCase() || "U";
     }
     return user.fullName.trim().slice(0, 2).toUpperCase() || "U";
-  }, [user?.fullName]);
+  }, [user]);
 
   // Logout functionality:
   // 1. Clear tokens from localStorage
@@ -95,7 +128,7 @@ export function Navbar() {
   const userFirstName = React.useMemo(() => {
     if (!user?.fullName || !user.fullName.trim()) return "প্রোফাইল";
     return user.fullName.trim().split(/\s+/)[0];
-  }, [user?.fullName]);
+  }, [user]);
 
   return (
     <>
@@ -136,25 +169,31 @@ export function Navbar() {
 
             {/* Desktop Search Bar */}
             <div className="hidden md:flex flex-1 max-w-lg mx-2">
-              <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <form onSubmit={handleSearchSubmit} className="relative w-full">
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#FF6F0F] transition-colors cursor-pointer"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
                 <input
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   placeholder={`${areaLabel} ও আশেপাশে যেকোনো পণ্য খুঁজুন...`}
                   className="w-full pl-10 pr-9 py-2 text-sm bg-slate-100 hover:bg-slate-200/70 focus:bg-white border border-transparent focus:border-orange-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-800 placeholder-slate-400 transition-all"
                 />
-                {searchQuery && (
+                {searchInput && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery("")}
+                    onClick={handleClearSearch}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
-              </div>
+              </form>
             </div>
 
             {/* Right Navigation Actions */}
@@ -330,25 +369,31 @@ export function Navbar() {
 
           {/* Mobile Search Bar Row */}
           <div className="md:hidden pb-3 pt-1">
-            <div className="relative w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
+              <button
+                type="submit"
+                aria-label="Search"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#FF6F0F] transition-colors cursor-pointer"
+              >
+                <Search className="h-4 w-4" />
+              </button>
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={`${areaLabel} ও আশেপাশে পণ্য খুঁজুন...`}
                 className="w-full pl-10 pr-9 py-2 text-xs bg-slate-100 focus:bg-white border border-transparent focus:border-orange-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-800 placeholder-slate-400"
               />
-              {searchQuery && (
+              {searchInput && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onClick={handleClearSearch}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-slate-400 cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
-            </div>
+            </form>
           </div>
         </div>
       </header>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { CategoryPills } from "@/components/modules/products/CategoryPills";
 import { ProductGrid } from "@/components/modules/products/ProductGrid";
 import { useFilterStore } from "@/store/useFilterStore";
@@ -52,13 +53,13 @@ export default function HomePage() {
                 <span>এলাকা বদলান</span>
               </button>
 
-              <button
-                type="button"
+              <Link
+                href="/post-ad"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-[#FF6F0F] hover:bg-orange-50 font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <PlusCircle className="h-4 w-4 stroke-[2.5]" />
                 <span>বিজ্ঞাপন পোস্ট করুন</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   ApiResponse,
   AuthResponseData,
@@ -6,6 +7,7 @@ import {
   LoginPayload,
   RegisterPayload,
   ResendOtpPayload,
+  UpdateProfilePayload,
   VerifyOtpPayload,
 } from "@/types/user.types";
 
@@ -61,6 +63,17 @@ export const authService = {
    */
   async getProfile(): Promise<ApiResponse<IUser>> {
     const response = await apiClient.get<ApiResponse<IUser>>("/auth/me");
+    return response.data;
+  },
+
+  /**
+   * Update authenticated user's profile
+   */
+  async updateProfile(payload: UpdateProfilePayload): Promise<ApiResponse<IUser>> {
+    const response = await apiClient.patch<ApiResponse<IUser>>("/users/profile", payload);
+    if (response.data?.success && response.data?.data) {
+      useAuthStore.getState().setUser(response.data.data);
+    }
     return response.data;
   },
 };

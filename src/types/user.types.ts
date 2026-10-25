@@ -57,7 +57,7 @@ export interface User {
 // Alias for backwards compatibility
 export type IUser = User;
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   statusCode: number;
   success: boolean;
   message: string;
@@ -104,9 +104,13 @@ export interface ResendOtpPayload {
 
 export interface UpdateProfilePayload {
   fullName?: string;
+  phone?: string;
   avatar?: string | null;
   areaId?: string | null;
   address?: string | null;
+  role?: UserRole;
+  shopName?: string | null;
+  bio?: string | null;
 }
 
 export interface BecomeSellerPayload {
