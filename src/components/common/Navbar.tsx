@@ -65,7 +65,7 @@ export function Navbar() {
     if (e) e.preventDefault();
     const trimmed = searchInput.trim();
     setSearchQuery(trimmed);
-    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+    if (typeof window !== "undefined" && window.location.pathname !== "/" && window.location.pathname !== "/products") {
       router.push("/");
     }
   };
@@ -297,14 +297,14 @@ export function Navbar() {
                           <span>আমার বিজ্ঞাপন</span>
                         </DropdownMenuItem>
 
-                        {/* If user.role === 'USER': "সেলার অনবোর্ডিং" (/become-seller) with Store icon */}
+                        {/* If user.role === 'USER': "বিক্রেতা হন" (/become-seller) with Store icon */}
                         {user.role === "USER" && (
                           <DropdownMenuItem
                             onClick={() => router.push("/become-seller")}
                             className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50/60 hover:bg-emerald-100/70 transition-colors cursor-pointer"
                           >
                             <Store className="h-4 w-4 text-emerald-600" />
-                            <span>সেলার অনবোর্ডিং</span>
+                            <span>বিক্রেতা হন</span>
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuGroup>

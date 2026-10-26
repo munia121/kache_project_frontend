@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useFilterStore } from "@/store/useFilterStore";
 import { productService } from "@/services/product.service";
@@ -19,7 +20,17 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "বই-ও-স্টেশনারি": "📚",
 };
 
-export function CategoryPills() {
+interface CategoryPillsProps {
+  /**
+   * When true (e.g. on HomePage), clicking a category navigates to `/products?category=...`
+   * where the comprehensive sidebar filter panel is active.
+   * When false (e.g. on /products), clicking simply updates the category filter in-place.
+   */
+  navigateToProducts?: boolean;
+}
+
+export function CategoryPills({ navigateToProducts = false }: CategoryPillsProps) {
+  const router = useRouter();
   const { selectedCategory, setSelectedCategory } = useFilterStore();
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -55,6 +66,17 @@ export function CategoryPills() {
     }
   };
 
+  const handleAllClick = () => {
+    setSelectedCategory("সকল");
+  };
+
+  const handleCategoryClick = (catSlug: string) => {
+    setSelectedCategory(catSlug);
+    if (navigateToProducts) {
+      router.push(`/products?category=${encodeURIComponent(catSlug)}`);
+    }
+  };
+
   return (
     <div className="relative w-full py-2">
       {/* Scroll Left Button (desktop) */}
@@ -78,7 +100,7 @@ export function CategoryPills() {
         {/* All Products Pill */}
         <button
           type="button"
-          onClick={() => setSelectedCategory("সকল")}
+          onClick={handleAllClick}
           className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
             selectedCategory === "সকল" || selectedCategory === "all" || !selectedCategory
               ? "bg-[#FF6F0F] text-white shadow-sm shadow-orange-500/20 font-semibold scale-[1.02]"
@@ -106,7 +128,7 @@ export function CategoryPills() {
             <button
               key={cat.id}
               type="button"
-              onClick={() => setSelectedCategory(cat.slug)}
+              onClick={() => handleCategoryClick(cat.slug)}
               className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
                 isSelected
                   ? "bg-[#FF6F0F] text-white shadow-sm shadow-orange-500/20 font-semibold scale-[1.02]"

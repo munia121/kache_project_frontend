@@ -24,7 +24,13 @@ export const userService = {
   async updateProfile(payload: UpdateProfilePayload): Promise<ApiResponse<IUser>> {
     const response = await apiClient.patch<ApiResponse<IUser>>("/users/profile", payload);
     if (response.data?.success && response.data?.data) {
-      useAuthStore.getState().setUser(response.data.data);
+      const currentUser = useAuthStore.getState().user;
+      const updatedUser: IUser = {
+        ...(currentUser || {}),
+        ...response.data.data,
+        ...(payload.role ? { role: payload.role } : {}),
+      } as IUser;
+      useAuthStore.getState().setUser(updatedUser);
     }
     return response.data;
   },

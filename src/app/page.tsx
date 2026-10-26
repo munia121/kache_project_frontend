@@ -13,8 +13,13 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
-  const { selectedArea, setIsLocationModalOpen } = useFilterStore();
+  const { selectedArea, setIsLocationModalOpen, setSelectedCategory } = useFilterStore();
   const areaLabel = selectedArea.split(",")[0].trim();
+
+  // Reset category on Home page mount so Home page is 100% clean and displays all products
+  React.useEffect(() => {
+    setSelectedCategory("সকল");
+  }, [setSelectedCategory]);
 
   return (
     <div className="w-full min-h-screen">
@@ -78,11 +83,11 @@ export default function HomePage() {
               হট কালেকশন
             </span>
           </div>
-          <CategoryPills />
+          <CategoryPills navigateToProducts={true} />
         </div>
 
-        {/* Dynamic Filtered Product Grid */}
-        <ProductGrid />
+        {/* Dynamic Filtered Product Grid (Clean Home Mode) */}
+        <ProductGrid showSidebarFilters={false} />
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 import { userService } from "@/services/user.service";
-import { ILocationArea, UserRole, UpdateProfilePayload } from "@/types/user.types";
+import { ILocationArea, UserRole, UpdateProfilePayload, IUser } from "@/types/user.types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,10 @@ export default function ProfilePage() {
   const [editShopName, setEditShopName] = React.useState("");
   const [editBio, setEditBio] = React.useState("");
   const [isSavingProfile, setIsSavingProfile] = React.useState(false);
+
+  // Role Switch Confirmation State
+  const [isConfirmSwitchOpen, setIsConfirmSwitchOpen] = React.useState(false);
+  const [isSwitchingRole, setIsSwitchingRole] = React.useState(false);
 
   // Preload areas on mount
   React.useEffect(() => {
@@ -181,6 +185,53 @@ export default function ProfilePage() {
       } finally {
         setIsLoadingAreas(false);
       }
+    }
+  };
+
+  // Handle One-Click Role Switch to USER
+  const handleConfirmRoleSwitch = async () => {
+    try {
+      setIsSwitchingRole(true);
+      const res = await userService.updateProfile({ role: "USER" });
+
+      if (res?.success) {
+        // 1. Immediately update Zustand store with new user object (role: 'USER')
+        const updatedUser: IUser = {
+          ...user!,
+          ...(res.data || {}),
+          role: "USER",
+        };
+        setUser(updatedUser);
+
+        // 2. Synchronize edit profile modal fields if open
+        setEditRole("USER");
+        setIsConfirmSwitchOpen(false);
+        setIsEditProfileOpen(false);
+
+        // 3. Sonner toast upon success
+        toast.success("অ্যাকাউন্ট সফলভাবে ক্রেতা (USER) মোডে পরিবর্তিত হয়েছে");
+
+        // 4. Background refresh profile to ensure populated relations
+        userService
+          .getMyProfile()
+          .then((fresh) => {
+            if (fresh?.success && fresh.data) {
+              setUser({ ...fresh.data, role: "USER" });
+            }
+          })
+          .catch(() => {});
+      } else {
+        toast.error(res?.message || "রোল পরিবর্তন করতে ব্যর্থ হয়েছে");
+      }
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg =
+        errorObj.response?.data?.message ||
+        errorObj.message ||
+        "রোল পরিবর্তন করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।";
+      toast.error(msg);
+    } finally {
+      setIsSwitchingRole(false);
     }
   };
 
@@ -337,7 +388,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -347,6 +398,19 @@ export default function ProfilePage() {
             <Edit3 className="h-3.5 w-3.5 mr-1 text-[#FF6F0F]" />
             তথ্য পরিবর্তন করুন
           </Button>
+
+          {user?.role === "SELLER" && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isSwitchingRole}
+              onClick={() => setIsConfirmSwitchOpen(true)}
+              className="rounded-full text-xs font-bold border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900 cursor-pointer"
+            >
+              <UserIcon className="h-3.5 w-3.5 mr-1 text-amber-700" />
+              ক্রেতা মোডে ফিরুন
+            </Button>
+          )}
 
           <Link
             href="/my-listings"
@@ -385,9 +449,10 @@ export default function ProfilePage() {
             </h2>
 
             {/* Role Status Badge */}
-            <div className="mt-2">
+            <div className="mt-2 flex flex-col items-center gap-1.5">
               <span
-                className={`inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full border ${
+                data-testid="profile-role-badge"
+                className={`inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full border transition-colors ${
                   user?.role === "SELLER"
                     ? "bg-emerald-50 text-emerald-700 border-emerald-300"
                     : user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"
@@ -400,7 +465,7 @@ export default function ProfilePage() {
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     <span>ভেরিফাইড বিক্রেতা</span>
                   </>
-                ) : user?.role === "ADMIN" ? (
+                ) : user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" ? (
                   <>
                     <ShieldCheck className="h-3.5 w-3.5 text-purple-600" />
                     <span>অ্যাডমিনিস্ট্রেটর</span>
@@ -408,10 +473,21 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <UserIcon className="h-3.5 w-3.5 text-[#FF6F0F]" />
-                    <span>কমিউনিটি মেম্বার</span>
+                    <span>USER</span>
                   </>
                 )}
               </span>
+
+              {user?.role === "SELLER" && (
+                <button
+                  type="button"
+                  disabled={isSwitchingRole}
+                  onClick={() => setIsConfirmSwitchOpen(true)}
+                  className="text-[11px] font-semibold text-slate-500 hover:text-[#FF6F0F] transition-colors underline cursor-pointer"
+                >
+                  ক্রেতা মোডে ফিরুন
+                </button>
+              )}
             </div>
 
             {/* Quick Details List */}
@@ -526,19 +602,38 @@ export default function ProfilePage() {
 
           {/* If role is SELLER: Display Shop Name & Seller Bio */}
           {user?.role === "SELLER" ? (
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <div className="h-10 w-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                  <Store className="h-5 w-5" />
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 transition-all duration-300 ease-in-out">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <Store className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      ভেরিফাইড সেলার তথ্য
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      আপনার দোকানের নাম ও বায়ো ক্রেতাদের কাছে দৃশ্যমান থাকবে
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    ভেরিফাইড সেলার তথ্য
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    আপনার দোকানের নাম ও বায়ো ক্রেতাদের কাছে দৃশ্যমান থাকবে
-                  </p>
-                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSwitchingRole}
+                  onClick={() => setIsConfirmSwitchOpen(true)}
+                  className="rounded-full text-xs font-bold border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900 cursor-pointer self-start sm:self-center shrink-0"
+                >
+                  {isSwitchingRole ? (
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> পরিবর্তন হচ্ছে...
+                    </span>
+                  ) : (
+                    "সাধারণ ক্রেতা মোডে ফিরুন"
+                  )}
+                </Button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
@@ -577,7 +672,7 @@ export default function ProfilePage() {
             </div>
           ) : (
             /* If role is USER: Display Seller Onboarding Call-to-Action Card */
-            <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50/40 rounded-3xl p-6 border border-orange-200/80 shadow-sm relative overflow-hidden">
+            <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50/40 rounded-3xl p-6 border border-orange-200/80 shadow-sm relative overflow-hidden transition-all duration-300 ease-in-out">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1.5 max-w-md">
                   <div className="inline-flex items-center gap-1 text-xs font-bold text-[#FF6F0F] bg-white px-2.5 py-0.5 rounded-full border border-orange-200 shadow-2xs">
@@ -827,38 +922,40 @@ export default function ProfilePage() {
                         রোল ব্যবস্থাপনা (Role Management)
                       </span>
                       <span className="text-[11px] text-slate-500">
-                        {editRole === "USER"
-                          ? "সাধারণ ক্রেতা হিসেবে রূপান্তরিত হবে"
-                          : "ভেরিফাইড বিক্রেতা হিসেবে সক্রিয় রয়েছে"}
+                        বর্তমান রোল: ভেরিফাইড বিক্রেতা (SELLER)
                       </span>
                     </div>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        editRole === "SELLER"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                          : "bg-slate-100 text-slate-600 border-slate-300"
-                      }`}
-                    >
-                      {editRole === "SELLER" ? "বিক্রেতা (SELLER)" : "ক্রেতা (USER)"}
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-300">
+                      বিক্রেতা (SELLER)
                     </span>
                   </div>
 
-                  <label className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 hover:border-orange-300 transition-colors cursor-pointer select-none">
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-0.5 pr-2">
                       <span className="text-xs font-bold text-slate-800">
                         সাধারণ ক্রেতা (USER) মোডে ফিরুন
                       </span>
                       <p className="text-[11px] text-slate-500">
-                        টিক দিলে প্রোফাইল সেভ করার পর বিক্রেতা মোড বন্ধ হয়ে সাধারণ ক্রেতা একাউন্টে ফিরে যাবেন
+                        এক ক্লিকে বিক্রেতা মোড বন্ধ করে সাধারণ ক্রেতা অ্যাকাউন্টে ফিরে যান
                       </p>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={editRole === "USER"}
-                      onChange={(e) => setEditRole(e.target.checked ? "USER" : "SELLER")}
-                      className="h-5 w-5 rounded border-slate-300 text-[#FF6F0F] focus:ring-[#FF6F0F] cursor-pointer shrink-0"
-                    />
-                  </label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isSwitchingRole}
+                      onClick={() => setIsConfirmSwitchOpen(true)}
+                      className="rounded-xl text-xs font-bold border-amber-300 text-amber-800 hover:bg-amber-100 hover:text-amber-900 shrink-0 cursor-pointer"
+                    >
+                      {isSwitchingRole ? (
+                        <span className="flex items-center gap-1.5">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" /> স্যুইচ হচ্ছে...
+                        </span>
+                      ) : (
+                        "ক্রেতা মোডে স্যুইচ করুন"
+                      )}
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -929,6 +1026,64 @@ export default function ProfilePage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================= */}
+      {/* ROLE SWITCH CONFIRMATION DIALOG */}
+      {/* ========================================================= */}
+      <Dialog open={isConfirmSwitchOpen} onOpenChange={setIsConfirmSwitchOpen}>
+        <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white shadow-2xl border-slate-200 z-[60]">
+          <DialogHeader className="space-y-2 pb-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <UserIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold text-slate-900">
+                  রোল পরিবর্তন নিশ্চিতকরণ
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500">
+                  বিক্রেতা থেকে সাধারণ ক্রেতা অ্যাকাউন্টে পরিবর্তন
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="py-3 space-y-2">
+            <p className="text-sm font-semibold text-slate-800">
+              আপনি কি নিশ্চিতভাবে সাধারণ ক্রেতা অ্যাকাউন্টে ফিরতে চান?
+            </p>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              সাধারণ ক্রেতা হিসেবে ফিরলে আপনার বিক্রেতা প্রোফাইল ও দোকানের তথ্য সাময়িকভাবে নিষ্ক্রিয় থাকবে। পরবর্তীতে আপনি চাইলে পুনরায় বিক্রেতা মোড চালু করতে পারবেন।
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSwitchingRole}
+              onClick={() => setIsConfirmSwitchOpen(false)}
+              className="rounded-xl text-xs font-semibold cursor-pointer"
+            >
+              বাতিল
+            </Button>
+            <Button
+              type="button"
+              disabled={isSwitchingRole}
+              onClick={handleConfirmRoleSwitch}
+              className="rounded-xl text-xs font-bold bg-[#FF6F0F] hover:bg-[#F95738] text-white shadow-sm cursor-pointer"
+            >
+              {isSwitchingRole ? (
+                <span className="flex items-center gap-1.5">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> পরিবর্তন হচ্ছে...
+                </span>
+              ) : (
+                "হ্যাঁ, নিশ্চিত করুন"
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

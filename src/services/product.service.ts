@@ -30,13 +30,16 @@ export const productService = {
         queryParams.searchTerm = search;
       }
 
-      // 2. Category query: backend accepts category or categoryId (slug or UUID)
+      // 2. Category criteria: backend accepts category (slug or name) or categoryId (UUID)
       const category = (params.category || params.categoryId)?.trim();
       if (category && category !== "সকল" && category !== "all") {
         queryParams.category = category;
+        if (params.categoryId) {
+          queryParams.categoryId = params.categoryId;
+        }
       }
 
-      // 3. Area query: backend accepts 'area' (UUID or slug)
+      // 3. Area criteria: backend accepts 'area' or 'areaId' (UUID or slug)
       const area = (params.area || params.areaId)?.trim();
       if (
         area &&
@@ -45,16 +48,58 @@ export const productService = {
         area !== "ঢাকা"
       ) {
         queryParams.area = area;
+        if (params.areaId) {
+          queryParams.areaId = params.areaId;
+        }
       }
 
-      // 4. Boundary and auxiliary filters
-      if (params.condition) queryParams.condition = params.condition;
-      if (params.isNegotiable !== undefined) queryParams.isNegotiable = params.isNegotiable;
-      if (params.status) queryParams.status = params.status;
-      if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice;
-      if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice;
-      if (params.sortBy) queryParams.sortBy = params.sortBy;
-      if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
+      // 4. Condition criteria
+      if (params.condition && params.condition !== "ALL") {
+        queryParams.condition = params.condition;
+      }
+
+      // 5. Negotiable criteria
+      if (
+        params.isNegotiable !== undefined &&
+        params.isNegotiable !== false &&
+        params.isNegotiable !== "false"
+      ) {
+        queryParams.isNegotiable = params.isNegotiable;
+      }
+
+      // 6. Price range
+      if (params.minPrice !== undefined && params.minPrice !== "" && Number(params.minPrice) >= 0) {
+        queryParams.minPrice = Number(params.minPrice);
+      }
+      if (params.maxPrice !== undefined && params.maxPrice !== "" && Number(params.maxPrice) >= 0) {
+        queryParams.maxPrice = Number(params.maxPrice);
+      }
+
+      // 7. Status criteria
+      if (params.status) {
+        queryParams.status = params.status;
+      }
+
+      // 8. Sorting: map friendly sort names or pass through
+      if (params.sortBy) {
+        if (params.sortBy === "newest") {
+          queryParams.sortBy = "createdAt";
+          queryParams.sortOrder = "desc";
+        } else if (params.sortBy === "price_asc") {
+          queryParams.sortBy = "price";
+          queryParams.sortOrder = "asc";
+        } else if (params.sortBy === "price_desc") {
+          queryParams.sortBy = "price";
+          queryParams.sortOrder = "desc";
+        } else {
+          queryParams.sortBy = params.sortBy;
+          if (params.sortOrder) {
+            queryParams.sortOrder = params.sortOrder;
+          }
+        }
+      }
+
+      // 9. Pagination
       if (params.page) queryParams.page = params.page;
       if (params.limit) queryParams.limit = params.limit;
     }

@@ -59,6 +59,7 @@ export function PostAdForm() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PostAdFormData>({
     resolver: zodResolver(postAdSchema) as Resolver<PostAdFormData>,
@@ -182,6 +183,15 @@ export function PostAdForm() {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Clean up object URLs on component unmount
+  React.useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => {
+        URL.revokeObjectURL(preview);
+      });
+    };
+  }, [imagePreviews]);
+
   // Form Submission
   const onSubmit = async (data: PostAdFormData) => {
     if (images.length === 0) {
@@ -210,6 +220,29 @@ export function PostAdForm() {
 
       if (response.success && response.data) {
         toast.success("বিজ্ঞাপন সফলভাবে পোস্ট করা হয়েছে!");
+
+        // Immediately revoke and clear image previews and file input
+        imagePreviews.forEach((preview) => {
+          URL.revokeObjectURL(preview);
+        });
+        setImages([]);
+        setImagePreviews([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+
+        // Immediately reset form fields to clean state
+        reset({
+          title: "",
+          categoryId: "",
+          price: 0,
+          isNegotiable: false,
+          condition: "USED",
+          divisionId: user?.locationArea?.district?.divisionId || "",
+          districtId: user?.locationArea?.districtId || "",
+          areaId: user?.locationArea?.id || user?.areaId || "",
+          description: "",
+        });
 
         // Invalidate active product queries so homepage refreshes immediately
         queryClient.invalidateQueries({ queryKey: ["products"] });
