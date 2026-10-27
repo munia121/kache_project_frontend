@@ -1,16 +1,8 @@
+import { Category } from "./category.types";
+export type { Category } from "./category.types";
+
 export type ProductCondition = "NEW" | "USED" | "REFURBISHED";
 export type ProductStatus = "AVAILABLE" | "SOLD" | "ARCHIVED";
-
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  emoji?: string;
-  icon?: string | null;
-  description?: string | null;
-  isActive?: boolean;
-  order?: number;
-}
 
 export interface IProductSeller {
   id: string;

@@ -4,7 +4,6 @@ import "./globals.css";
 import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { LocationPickerDialog } from "@/components/modules/locations/LocationPickerDialog";
-import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -35,13 +34,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6F0F]">
-        <QueryProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <LocationPickerDialog />
-          <Toaster position="top-center" richColors />
-        </QueryProvider>
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <LocationPickerDialog />
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

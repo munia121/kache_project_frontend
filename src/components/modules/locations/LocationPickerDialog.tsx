@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useFilterStore } from "@/store/useFilterStore";
-import { productService } from "@/services/product.service";
+import { locationService } from "@/services/location.service";
+import { ILocationArea } from "@/types/user.types";
 import { MapPin, Search, Check, Navigation, Flame, Globe2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -47,16 +47,24 @@ export function LocationPickerDialog() {
   } = useFilterStore();
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  // Fetch areas from backend API with fallback
-  const { data: areasData } = useQuery({
-    queryKey: ["locations", "areas"],
-    queryFn: () => productService.getAreas(),
-    staleTime: 1000 * 60 * 30,
-  });
+  // Fetch areas from backend API via server action
+  const [areas, setAreas] = React.useState<ILocationArea[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    locationService.getAreas().then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setAreas(res.data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const availableAreas: AreaItem[] = React.useMemo(() => {
-    if (areasData?.data && areasData.data.length > 0) {
-      return areasData.data.map((item) => {
+    if (areas && areas.length > 0) {
+      return areas.map((item) => {
         const fallback = DEFAULT_DHAKA_AREAS.find(
           (d) =>
             d.id === item.id ||
@@ -74,7 +82,7 @@ export function LocationPickerDialog() {
       });
     }
     return DEFAULT_DHAKA_AREAS;
-  }, [areasData]);
+  }, [areas]);
 
   const filteredAreas = availableAreas.filter(
     (area) =>

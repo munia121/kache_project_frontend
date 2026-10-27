@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   useFilterStore,
   ProductConditionFilter,
   ProductSortOption,
 } from "@/store/useFilterStore";
-import { productService } from "@/services/product.service";
+import { categoryService } from "@/services/category.service";
+import { locationService } from "@/services/location.service";
+import { Category } from "@/types/category.types";
+import { ILocationArea } from "@/types/user.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -67,9 +69,15 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 
 interface FilterContentProps {
   onCloseMobileDrawer?: () => void;
+  initialCategories?: Category[];
+  initialAreas?: ILocationArea[];
 }
 
-function FilterContent({ onCloseMobileDrawer }: FilterContentProps) {
+function FilterContent({
+  onCloseMobileDrawer,
+  initialCategories = [],
+  initialAreas = [],
+}: FilterContentProps) {
   const {
     selectedCategory,
     setSelectedCategory,
@@ -112,26 +120,36 @@ function FilterContent({ onCloseMobileDrawer }: FilterContentProps) {
     setLocalMaxPrice(maxPrice !== undefined ? String(maxPrice) : "");
   }, [maxPrice]);
 
-  // Categories query
-  const { data: categoriesData } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => productService.getCategories(),
-    staleTime: 1000 * 60 * 10,
-  });
+  // Server action state for categories and areas
+  const [categories, setCategories] = React.useState<Category[]>(initialCategories);
+  const [areas, setAreas] = React.useState<ILocationArea[]>(initialAreas);
 
-  const categories = categoriesData?.data || [];
+  React.useEffect(() => {
+    if (initialCategories.length > 0) {
+      setCategories(initialCategories);
+    } else {
+      categoryService.getCategories().then((res) => {
+        if (res?.success && Array.isArray(res.data)) {
+          setCategories(res.data);
+        }
+      });
+    }
 
-  // Areas query for dropdown list
-  const { data: areasData } = useQuery({
-    queryKey: ["locations", "areas"],
-    queryFn: () => productService.getAreas(),
-    staleTime: 1000 * 60 * 30,
-  });
+    if (initialAreas.length > 0) {
+      setAreas(initialAreas);
+    } else {
+      locationService.getAreas().then((res) => {
+        if (res?.success && Array.isArray(res.data)) {
+          setAreas(res.data);
+        }
+      });
+    }
+  }, [initialCategories, initialAreas]);
 
   const mergedAreas: AreaOption[] = React.useMemo(() => {
     const list: AreaOption[] = [...POPULAR_DHAKA_AREAS];
-    if (areasData?.data && areasData.data.length > 0) {
-      areasData.data.forEach((apiArea) => {
+    if (areas && areas.length > 0) {
+      areas.forEach((apiArea) => {
         const exists = list.some(
           (a) =>
             a.id === apiArea.id ||
@@ -149,7 +167,7 @@ function FilterContent({ onCloseMobileDrawer }: FilterContentProps) {
       });
     }
     return list;
-  }, [areasData]);
+  }, [areas]);
 
   // Handle Area Selection
   const handleAreaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -497,7 +515,15 @@ function FilterContent({ onCloseMobileDrawer }: FilterContentProps) {
   );
 }
 
-export function ProductFilterSidebar() {
+interface ProductFilterSidebarProps {
+  initialCategories?: Category[];
+  initialAreas?: ILocationArea[];
+}
+
+export function ProductFilterSidebar({
+  initialCategories = [],
+  initialAreas = [],
+}: ProductFilterSidebarProps = {}) {
   const { isFilterDrawerOpen, setIsFilterDrawerOpen, getActiveFiltersCount } = useFilterStore();
   const activeCount = getActiveFiltersCount();
 
@@ -508,7 +534,10 @@ export function ProductFilterSidebar() {
       {/* ========================================================= */}
       <aside className="hidden lg:block w-72 shrink-0">
         <div className="sticky top-20 bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
-          <FilterContent />
+          <FilterContent
+            initialCategories={initialCategories}
+            initialAreas={initialAreas}
+          />
         </div>
       </aside>
 
@@ -552,7 +581,11 @@ export function ProductFilterSidebar() {
 
             {/* Scrollable Filter Form Body */}
             <div className="flex-1 overflow-y-auto p-5">
-              <FilterContent onCloseMobileDrawer={() => setIsFilterDrawerOpen(false)} />
+              <FilterContent
+                onCloseMobileDrawer={() => setIsFilterDrawerOpen(false)}
+                initialCategories={initialCategories}
+                initialAreas={initialAreas}
+              />
             </div>
 
             {/* Sticky Bottom Confirmation Bar */}

@@ -118,10 +118,26 @@ export function AuthModal() {
         } else {
           toast.error("লগইন টোকেন পাওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
         }
+      } else {
+        const msg =
+          response?.message ||
+          "লগইন ব্যর্থ হয়েছে। মোবাইল/ইমেইল এবং পাসওয়ার্ড যাচাই করুন।";
+        setLoginError(msg);
+
+        // If email is not verified, offer direct switch to OTP
+        if (
+          msg.toLowerCase().includes("verify your email") ||
+          msg.toLowerCase().includes("verified")
+        ) {
+          if (loginIdentifier.includes("@")) {
+            setOtpEmail(loginIdentifier.trim().toLowerCase());
+          }
+        }
       }
     } catch (err: any) {
       const msg =
         err.response?.data?.message ||
+        err?.message ||
         "লগইন ব্যর্থ হয়েছে। মোবাইল/ইমেইল এবং পাসওয়ার্ড যাচাই করুন।";
       setLoginError(msg);
 
@@ -184,10 +200,16 @@ export function AuthModal() {
         toast.success("নিবন্ধন সফল হয়েছে!", {
           description: "আপনার ইমেইলে ৬ ডিজিটের ভেরিফিকেশন কোড পাঠানো হয়েছে।",
         });
+      } else {
+        const msg =
+          response?.message ||
+          "রেজিস্ট্রেশন সম্পূর্ণ করা যায়নি। পুনরায় চেষ্টা করুন।";
+        setRegisterError(msg);
       }
     } catch (err: any) {
       const msg =
         err.response?.data?.message ||
+        err?.message ||
         "রেজিস্ট্রেশন সম্পূর্ণ করা যায়নি। পুনরায় চেষ্টা করুন।";
       setRegisterError(msg);
     } finally {
@@ -226,10 +248,16 @@ export function AuthModal() {
         } else {
           toast.error("ভেরিফিকেশন সম্পন্ন হলেও টোকেন পাওয়া যায়নি।");
         }
+      } else {
+        const msg =
+          response?.message ||
+          "ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক কোড দিন অথবা নতুন ওটিপি চান।";
+        setOtpError(msg);
       }
     } catch (err: any) {
       const msg =
         err.response?.data?.message ||
+        err?.message ||
         "ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক কোড দিন অথবা নতুন ওটিপি চান।";
       setOtpError(msg);
     } finally {
@@ -255,10 +283,13 @@ export function AuthModal() {
         toast.success("নতুন ওটিপি কোড পাঠানো হয়েছে!", {
           description: "অনুগ্রহ করে আপনার ইমেইল ইনবক্স চেক করুন।",
         });
+      } else {
+        const msg = response?.message || "ওটিপি পুনরায় পাঠাতে সমস্যা হয়েছে।";
+        setOtpError(msg);
       }
     } catch (err: any) {
       const msg =
-        err.response?.data?.message || "ওটিপি পুনরায় পাঠাতে সমস্যা হয়েছে।";
+        err.response?.data?.message || err?.message || "ওটিপি পুনরায় পাঠাতে সমস্যা হয়েছে।";
       setOtpError(msg);
     } finally {
       setIsResendLoading(false);

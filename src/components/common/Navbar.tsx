@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFilterStore } from "@/store/useFilterStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { authService } from "@/services/auth.service";
 import {
   Search,
   MapPin,
@@ -113,6 +114,7 @@ export function Navbar() {
       localStorage.removeItem("kache_access_token");
     }
     logout();
+    authService.logout();
     toast.success("সফলভাবে লগআউট হয়েছে");
     router.push("/");
   };

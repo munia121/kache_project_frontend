@@ -1,15 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import {
   useFilterStore,
   ProductSortOption,
 } from "@/store/useFilterStore";
 import { productService } from "@/services/product.service";
+import { categoryService } from "@/services/category.service";
 import { ProductCard } from "@/components/modules/products/ProductCard";
 import { ProductGridSkeleton } from "@/components/modules/products/ProductGridSkeleton";
+import { Category } from "@/types/category.types";
+import { IProduct } from "@/types/product.types";
 import {
   SearchX,
   RotateCcw,
@@ -27,9 +30,15 @@ import { Button } from "@/components/ui/button";
 
 interface ProductGridProps {
   showSidebarFilters?: boolean;
+  initialProducts?: IProduct[];
+  initialCategories?: Category[];
 }
 
-export function ProductGrid({ showSidebarFilters = false }: ProductGridProps) {
+export function ProductGrid({
+  showSidebarFilters = false,
+  initialProducts = [],
+  initialCategories = [],
+}: ProductGridProps) {
   const {
     searchQuery,
     setSearchQuery,
@@ -71,14 +80,31 @@ export function ProductGrid({ showSidebarFilters = false }: ProductGridProps) {
 
   const areaParam = isAllAreas ? undefined : (selectedAreaId || selectedArea);
 
-  // Categories query to resolve friendly category label
-  const { data: categoriesData } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => productService.getCategories(),
-    staleTime: 1000 * 60 * 10,
-  });
+  // Categories state to resolve friendly category label
+  const [fetchedCategories, setFetchedCategories] = React.useState<Category[]>([]);
 
-  const selectedCategoryObj = categoriesData?.data?.find(
+  React.useEffect(() => {
+    if (initialCategories.length > 0) return;
+
+    let isMounted = true;
+    categoryService.getCategories().then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setFetchedCategories(res.data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [initialCategories]);
+
+  const categories = initialCategories.length > 0 ? initialCategories : fetchedCategories;
+
+
+
+
+
+  
+  const selectedCategoryObj = categories.find(
     (c) => c.slug === selectedCategory || c.name === selectedCategory || c.id === selectedCategory
   );
   const categoryDisplayName = selectedCategoryObj?.name || selectedCategory;
@@ -117,13 +143,45 @@ export function ProductGrid({ showSidebarFilters = false }: ProductGridProps) {
     sortBy,
   ]);
 
-  // Live TanStack Query
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["products", queryParams],
-    queryFn: () => productService.getProducts(queryParams),
-  });
+  // Live Server Action Data Fetching
+  const [products, setProducts] = React.useState<IProduct[]>(initialProducts);
+  const [isLoading, setIsLoading] = React.useState(initialProducts.length === 0);
+  const [isError, setIsError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const hasMountedRef = React.useRef(false);
 
-  const products = data?.data || [];
+  const fetchProducts = React.useCallback(async () => {
+    setIsLoading(true);
+    setIsError(false);
+    setErrorMessage(null);
+    try {
+      const res = await productService.getProducts(queryParams);
+      if (res?.success && Array.isArray(res.data)) {
+        setProducts(res.data);
+      } else {
+        setProducts([]);
+        if (!res?.success && res?.message) {
+          setIsError(true);
+          setErrorMessage(res.message);
+        }
+      }
+    } catch (err: any) {
+      setIsError(true);
+      setErrorMessage(err?.message || "পণ্য লোড করতে সমস্যা হয়েছে");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [queryParams]);
+
+  React.useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      if (initialProducts.length > 0) {
+        return;
+      }
+    }
+    fetchProducts();
+  }, [fetchProducts, initialProducts]);
 
   const handleShowAllAreas = () => {
     setSelectedArea("সব এলাকা, ঢাকা", undefined);
@@ -232,12 +290,13 @@ export function ProductGrid({ showSidebarFilters = false }: ProductGridProps) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pt-1">
             <div className="flex items-center gap-2">
               <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>পণ্যসমূহ</span>
+                 <span>পণ্যসমূহ</span>
                 {!isLoading && (
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-[#FF6F0F]">
                     {products.length}টি
                   </span>
-                )}
+                )} 
+                 
               </h2>
             </div>
 
@@ -413,12 +472,12 @@ export function ProductGrid({ showSidebarFilters = false }: ProductGridProps) {
             পণ্য লোড করতে সমস্যা হয়েছে
           </h3>
           <p className="text-xs text-slate-500 max-w-sm">
-            {(error as { message?: string })?.message ||
+            {errorMessage ||
               "ইন্টারনেট সংযোগ বা সার্ভার ত্রুটির কারণে পণ্য প্রদর্শন সম্ভব হচ্ছে না।"}
           </p>
           <Button
             size="sm"
-            onClick={() => refetch()}
+            onClick={() => fetchProducts()}
             className="text-xs rounded-full bg-[#FF6F0F] hover:bg-[#F95738] text-white cursor-pointer mt-2"
           >
             পুনরায় চেষ্টা করুন

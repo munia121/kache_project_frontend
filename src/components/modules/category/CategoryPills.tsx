@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { useFilterStore } from "@/store/useFilterStore";
-import { productService } from "@/services/product.service";
+import { categoryService } from "@/services/category.service";
+import { Category } from "@/types/category.types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const CATEGORY_EMOJIS: Record<string, string> = {
@@ -20,28 +21,43 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "বই-ও-স্টেশনারি": "📚",
 };
 
-interface CategoryPillsProps {
+export interface CategoryPillsProps {
   /**
    * When true (e.g. on HomePage), clicking a category navigates to `/products?category=...`
    * where the comprehensive sidebar filter panel is active.
    * When false (e.g. on /products), clicking simply updates the category filter in-place.
    */
   navigateToProducts?: boolean;
+  initialCategories?: Category[];
 }
 
-export function CategoryPills({ navigateToProducts = false }: CategoryPillsProps) {
+export function CategoryPills({
+  navigateToProducts = false,
+  initialCategories = [],
+}: CategoryPillsProps) {
   const router = useRouter();
   const { selectedCategory, setSelectedCategory } = useFilterStore();
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(true);
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => productService.getCategories(),
-  });
+  const [categories, setCategories] = React.useState<Category[]>(initialCategories);
 
-  const categories = categoriesData?.data || [];
+  React.useEffect(() => {
+    if (initialCategories.length > 0) {
+      setCategories(initialCategories);
+      return;
+    }
+    let isMounted = true;
+    categoryService.getCategories().then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setCategories(res.data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [initialCategories]);
 
   const checkScroll = () => {
     const el = scrollContainerRef.current;

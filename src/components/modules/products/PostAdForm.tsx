@@ -6,10 +6,17 @@ import { useRouter } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { productService } from "@/services/product.service";
+import { categoryService } from "@/services/category.service";
+import { locationService } from "@/services/location.service";
 import { userService } from "@/services/user.service";
+import { Category } from "@/types/category.types";
+import {
+  ILocationDivision,
+  ILocationDistrict,
+  ILocationArea,
+} from "@/types/user.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -46,7 +53,6 @@ export type PostAdFormData = z.infer<typeof postAdSchema>;
 
 export function PostAdForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
   const [images, setImages] = React.useState<File[]>([]);
@@ -82,37 +88,74 @@ export function PostAdForm() {
   const watchDivisionId = watch("divisionId");
   const watchDistrictId = watch("districtId");
 
-  // Fetch Categories
-  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => productService.getCategories(),
-  });
+  // State for server actions data fetching
+  const [categoriesList, setCategoriesList] = React.useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = React.useState(true);
+  const [divisionsList, setDivisionsList] = React.useState<ILocationDivision[]>([]);
+  const [districtsList, setDistrictsList] = React.useState<ILocationDistrict[]>([]);
+  const [areasList, setAreasList] = React.useState<ILocationArea[]>([]);
+  const [allAreasList, setAllAreasList] = React.useState<ILocationArea[]>([]);
 
-  // Fetch Divisions
-  const { data: divisionsData } = useQuery({
-    queryKey: ["divisions"],
-    queryFn: () => productService.getDivisions(),
-  });
+  // Fetch Categories, Divisions, and All Areas on mount
+  React.useEffect(() => {
+    let isMounted = true;
+    categoryService.getCategories().then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setCategoriesList(res.data);
+      }
+      if (isMounted) setIsLoadingCategories(false);
+    });
+
+    locationService.getDivisions().then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setDivisionsList(res.data);
+      }
+    });
+
+    locationService.getAreas().then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setAllAreasList(res.data);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Fetch Districts when division changes
-  const { data: districtsData } = useQuery({
-    queryKey: ["districts", watchDivisionId],
-    queryFn: () => productService.getDistricts(watchDivisionId || undefined),
-    enabled: !!watchDivisionId,
-  });
+  React.useEffect(() => {
+    if (!watchDivisionId) {
+      setDistrictsList([]);
+      return;
+    }
+    let isMounted = true;
+    locationService.getDistricts(watchDivisionId).then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setDistrictsList(res.data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [watchDivisionId]);
 
   // Fetch Areas when district changes
-  const { data: areasData } = useQuery({
-    queryKey: ["areas", watchDistrictId],
-    queryFn: () => productService.getAreas(watchDistrictId || undefined),
-    enabled: !!watchDistrictId,
-  });
-
-  // Fallback: Fetch all areas if no cascading district is selected yet
-  const { data: allAreasData } = useQuery({
-    queryKey: ["all-areas"],
-    queryFn: () => userService.getAreas(),
-  });
+  React.useEffect(() => {
+    if (!watchDistrictId) {
+      setAreasList([]);
+      return;
+    }
+    let isMounted = true;
+    locationService.getAreas(watchDistrictId).then((res) => {
+      if (isMounted && res?.success && Array.isArray(res.data)) {
+        setAreasList(res.data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [watchDistrictId]);
 
   // Initialize seller's registered area if available
   React.useEffect(() => {
@@ -244,10 +287,6 @@ export function PostAdForm() {
           description: "",
         });
 
-        // Invalidate active product queries so homepage refreshes immediately
-        queryClient.invalidateQueries({ queryKey: ["products"] });
-        queryClient.invalidateQueries({ queryKey: ["my-listings"] });
-
         // Redirect to new product details page
         router.push(`/products/${response.data.slug}`);
       }
@@ -260,10 +299,10 @@ export function PostAdForm() {
     }
   };
 
-  const categories = categoriesData?.data || [];
-  const divisions = divisionsData?.data || [];
-  const districts = districtsData?.data || [];
-  const areas = areasData?.data || allAreasData?.data || [];
+  const categories = categoriesList;
+  const divisions = divisionsList;
+  const districts = districtsList;
+  const areas = areasList.length > 0 ? areasList : allAreasList;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

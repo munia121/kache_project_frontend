@@ -3,8 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { productService } from "@/services/product.service";
+import { IProduct } from "@/types/product.types";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -75,14 +75,39 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
   const [isCopiedPhone, setIsCopiedPhone] = React.useState(false);
   const [isLiked, setIsLiked] = React.useState(false);
 
-  // Fetch product details
-  const { data: response, isLoading, isError } = useQuery({
-    queryKey: ["product", slug],
-    queryFn: () => productService.getProductBySlug(slug),
-    enabled: !!slug,
-  });
+  // Fetch product details via server action
+  const [product, setProduct] = React.useState<IProduct | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isError, setIsError] = React.useState(false);
 
-  const product = response?.data;
+  React.useEffect(() => {
+    if (!slug) return;
+    let isMounted = true;
+    setIsLoading(true);
+    setIsError(false);
+
+    productService
+      .getProductBySlug(slug)
+      .then((res) => {
+        if (isMounted) {
+          if (res?.success && res.data) {
+            setProduct(res.data);
+          } else {
+            setIsError(true);
+          }
+        }
+      })
+      .catch(() => {
+        if (isMounted) setIsError(true);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
 
   const handleCopyPhone = () => {
     if (product?.seller?.phone) {
