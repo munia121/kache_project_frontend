@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { LocationPickerDialog } from "@/components/modules/locations/LocationPickerDialog";
+import { FastLoginWidget } from "@/components/common/FastLoginWidget";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -38,6 +39,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <LocationPickerDialog />
+        <FastLoginWidget />
         <Toaster position="top-center" richColors />
       </body>
     </html>

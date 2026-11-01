@@ -28,6 +28,7 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
+import { FastLoginSelector } from "./FastLoginSelector";
 
 export function AuthModal() {
   const {
@@ -298,7 +299,7 @@ export function AuthModal() {
 
   return (
     <Dialog open={isAuthModalOpen} onOpenChange={(open) => !open && closeAuthModal()}>
-      <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden rounded-3xl bg-white shadow-2xl border-slate-200/90 gap-0">
+      <DialogContent className="sm:max-w-[460px] p-0 overflow-hidden rounded-3xl bg-white shadow-2xl border-slate-200/90 gap-0">
         {/* Karrot-inspired Header with Sunset Accent */}
         <div className="relative px-6 pt-6 pb-4 bg-gradient-to-b from-orange-50/80 via-orange-50/30 to-white border-b border-orange-100/50">
           <div className="flex items-center gap-3">
@@ -365,110 +366,134 @@ export function AuthModal() {
           {/* LOGIN VIEW */}
           {/* ========================================================= */}
           {authModalView === "login" && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              {loginError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex flex-col gap-1.5 animate-in fade-in-50">
-                  <div className="font-semibold flex items-center gap-1.5">
-                    <span>⚠️ {loginError}</span>
+            <div className="space-y-4">
+              {/* 1-Click Fast Login Section */}
+              <FastLoginSelector
+                onFillCredentials={(email, pass) => {
+                  setLoginIdentifier(email);
+                  setLoginPassword(pass);
+                  setLoginError(null);
+                }}
+                onSuccess={() => closeAuthModal()}
+              />
+
+              {/* Divider */}
+              <div className="relative my-3">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase">
+                  <span className="bg-white px-2.5 text-slate-400 font-bold tracking-wider">
+                    অথবা পাসওয়ার্ড দিয়ে ম্যানুয়াল লগইন
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-3.5">
+                {loginError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex flex-col gap-1.5 animate-in fade-in-50">
+                    <div className="font-semibold flex items-center gap-1.5">
+                      <span>⚠️ {loginError}</span>
+                    </div>
+                    {loginError.toLowerCase().includes("verify") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (loginIdentifier.includes("@")) {
+                            setOtpEmail(loginIdentifier.trim().toLowerCase());
+                          }
+                          setAuthModalView("otp");
+                        }}
+                        className="text-left text-[#FF6F0F] underline font-bold hover:text-[#F95738] mt-0.5"
+                      >
+                        এখনই ওটিপি ভেরিফাই করুন →
+                      </button>
+                    )}
                   </div>
-                  {loginError.toLowerCase().includes("verify") && (
+                )}
+
+                {/* Email / Phone Input */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700">
+                    ইমেইল অথবা মোবাইল নম্বর
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      type="text"
+                      required
+                      value={loginIdentifier}
+                      onChange={(e) => setLoginIdentifier(e.target.value)}
+                      placeholder="example@mail.com বা 017xxxxxxxx"
+                      className="pl-10 h-10 rounded-xl bg-slate-50 border-slate-200 text-sm focus:bg-white focus:border-[#FF6F0F] focus:ring-1 focus:ring-[#FF6F0F]"
+                    />
+                  </div>
+                </div>
+
+                {/* Password Input */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-700">
+                      পাসওয়ার্ড
+                    </label>
+                    <span className="text-[11px] text-slate-400 hover:text-[#FF6F0F] cursor-pointer">
+                      ভুলে গেছেন?
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      type={showLoginPassword ? "text" : "password"}
+                      required
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10 pr-10 h-10 rounded-xl bg-slate-50 border-slate-200 text-sm focus:bg-white focus:border-[#FF6F0F] focus:ring-1 focus:ring-[#FF6F0F]"
+                    />
                     <button
                       type="button"
-                      onClick={() => {
-                        if (loginIdentifier.includes("@")) {
-                          setOtpEmail(loginIdentifier.trim().toLowerCase());
-                        }
-                        setAuthModalView("otp");
-                      }}
-                      className="text-left text-[#FF6F0F] underline font-bold hover:text-[#F95738] mt-0.5"
+                      onClick={() => setShowLoginPassword((prev) => !prev)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                     >
-                      এখনই ওটিপি ভেরিফাই করুন →
+                      {showLoginPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={isLoginLoading}
+                  className="w-full h-11 rounded-xl bg-[#FF6F0F] hover:bg-[#F95738] active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+                >
+                  {isLoginLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      লগইন হচ্ছে...
+                    </span>
+                  ) : (
+                    "লগইন করুন"
                   )}
-                </div>
-              )}
+                </Button>
 
-              {/* Email / Phone Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
-                  ইমেইল অথবা মোবাইল নম্বর
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    type="text"
-                    required
-                    value={loginIdentifier}
-                    onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="example@mail.com বা 017xxxxxxxx"
-                    className="pl-10 h-10 rounded-xl bg-slate-50 border-slate-200 text-sm focus:bg-white focus:border-[#FF6F0F] focus:ring-1 focus:ring-[#FF6F0F]"
-                  />
+                <div className="text-center pt-2">
+                  <p className="text-xs text-slate-500">
+                    অ্যাকাউন্ট নেই?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setAuthModalView("register")}
+                      className="text-[#FF6F0F] font-bold hover:underline cursor-pointer"
+                    >
+                      নতুন অ্যাকাউন্ট খুলুন
+                    </button>
+                  </p>
                 </div>
-              </div>
-
-              {/* Password Input */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-700">
-                    পাসওয়ার্ড
-                  </label>
-                  <span className="text-[11px] text-slate-400 hover:text-[#FF6F0F] cursor-pointer">
-                    ভুলে গেছেন?
-                  </span>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    type={showLoginPassword ? "text" : "password"}
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10 h-10 rounded-xl bg-slate-50 border-slate-200 text-sm focus:bg-white focus:border-[#FF6F0F] focus:ring-1 focus:ring-[#FF6F0F]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowLoginPassword((prev) => !prev)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    {showLoginPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={isLoginLoading}
-                className="w-full h-11 rounded-xl bg-[#FF6F0F] hover:bg-[#F95738] active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer"
-              >
-                {isLoginLoading ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    লগইন হচ্ছে...
-                  </span>
-                ) : (
-                  "লগইন করুন"
-                )}
-              </Button>
-
-              <div className="text-center pt-2">
-                <p className="text-xs text-slate-500">
-                  অ্যাকাউন্ট নেই?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setAuthModalView("register")}
-                    className="text-[#FF6F0F] font-bold hover:underline cursor-pointer"
-                  >
-                    নতুন অ্যাকাউন্ট খুলুন
-                  </button>
-                </p>
-              </div>
-            </form>
+              </form>
+            </div>
           )}
 
           {/* ========================================================= */}
