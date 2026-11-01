@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/common/Navbar";
+// import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { LocationPickerDialog } from "@/components/modules/locations/LocationPickerDialog";
 import { Toaster } from "sonner";
+import { InitialUser } from "@/components/common/InitialUser";
+import { AuthModal } from "@/components/modules/auth/AuthModal";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,18 +26,22 @@ export const metadata: Metadata = {
   keywords: ["কাছে", "Kache", "Marketplace", "Dhaka", "Classifieds", "Buy and Sell"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
+
   return (
     <html
       lang="bn"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6F0F]">
-        <Navbar />
+        {/* <Navbar initialUser={InitialUser} /> */}
+        <InitialUser />
+          <AuthModal />
         <main className="flex-1">{children}</main>
         <Footer />
         <LocationPickerDialog />

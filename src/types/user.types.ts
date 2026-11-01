@@ -122,9 +122,10 @@ export interface BecomeSellerPayload {
 export interface IMyProductListing {
   id: string;
   title: string;
+  slug?: string;
   description: string;
   price: number;
-  status: "ACTIVE" | "PENDING" | "SOLD" | "REJECTED";
+  status: "ACTIVE" | "AVAILABLE" | "PENDING" | "SOLD" | "ARCHIVED" | "REJECTED" | string;
   condition?: string;
   images: string[];
   areaId?: string | null;

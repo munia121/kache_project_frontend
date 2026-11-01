@@ -1,5 +1,6 @@
 import { Category } from "./category.types";
 export type { Category } from "./category.types";
+export type { ApiResponse } from "./user.types";
 
 export type ProductCondition = "NEW" | "USED" | "REFURBISHED";
 export type ProductStatus = "AVAILABLE" | "SOLD" | "ARCHIVED";
@@ -81,10 +82,24 @@ export interface Product {
   likesCount?: number;
   chatsCount?: number;
   sellerName?: string;
+  isFavorited?: boolean;
+  isFavorite?: boolean;
+  wishlistId?: string;
+  favoritedAt?: string;
 }
 
 // Alias for unified usage
 export type IProduct = Product;
+
+export interface ToggleFavoriteResponse {
+  isFavorited: boolean;
+  productId: string;
+}
+
+export interface MyFavoritesParams {
+  page?: number;
+  limit?: number;
+}
 
 export interface GetProductsParams {
   searchTerm?: string;

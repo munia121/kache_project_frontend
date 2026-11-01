@@ -16,10 +16,25 @@ import {
 } from "@/types/user.types";
 
 export const userService = {
-  getMyProfile,
+  getMyProfile: (explicitToken?: string) => {
+    const token =
+      explicitToken ||
+      (typeof window !== "undefined"
+        ? localStorage.getItem("accessToken") ||
+          localStorage.getItem("kache_access_token") ||
+          undefined
+        : undefined);
+    return getMyProfile(token);
+  },
 
   async updateProfile(payload: UpdateProfilePayload): Promise<ApiResponse<IUser>> {
-    const response = await updateProfile(payload);
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken") ||
+          localStorage.getItem("kache_access_token") ||
+          undefined
+        : undefined;
+    const response = await updateProfile(payload, token);
     if (response?.success && response?.data) {
       const currentUser = useAuthStore.getState().user;
       const updatedUser: IUser = {

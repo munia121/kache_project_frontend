@@ -25,6 +25,8 @@ import {
   Banknote,
   Sparkles,
   ChevronDown,
+  ChevronUp,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -117,7 +119,7 @@ export function ProductGrid({
       return {
         searchTerm: searchQuery.trim() || undefined,
         area: areaParam,
-        limit: 30,
+        limit: 50,
       };
     }
     return {
@@ -148,6 +150,9 @@ export function ProductGrid({
   const [isLoading, setIsLoading] = React.useState(initialProducts.length === 0);
   const [isError, setIsError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [meta, setMeta] = React.useState<{ total?: number; totalPage?: number; page?: number } | null>(null);
+  const [showAllHomeProducts, setShowAllHomeProducts] = React.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React.useState(false);
   const hasMountedRef = React.useRef(false);
 
   const fetchProducts = React.useCallback(async () => {
@@ -158,6 +163,9 @@ export function ProductGrid({
       const res = await productService.getProducts(queryParams);
       if (res?.success && Array.isArray(res.data)) {
         setProducts(res.data);
+        if (res.meta) {
+          setMeta(res.meta);
+        }
       } else {
         setProducts([]);
         if (!res?.success && res?.message) {
@@ -172,6 +180,44 @@ export function ProductGrid({
       setIsLoading(false);
     }
   }, [queryParams]);
+
+  const handleSeeMore = async () => {
+    setShowAllHomeProducts(true);
+    // If backend has more products beyond the initial loaded batch, load next page
+    if (meta?.total && meta.total > products.length && !isLoadingMore) {
+      try {
+        setIsLoadingMore(true);
+        const nextPage = (meta.page || 1) + 1;
+        const res = await productService.getProducts({
+          ...queryParams,
+          page: nextPage,
+          limit: 50,
+        });
+        if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+          setProducts((prev) => {
+            const map = new Map<string, IProduct>();
+            [...prev, ...res.data].forEach((item) => map.set(item.id, item));
+            return Array.from(map.values());
+          });
+          if (res.meta) {
+            setMeta(res.meta);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load more products:", e);
+      } finally {
+        setIsLoadingMore(false);
+      }
+    }
+  };
+
+  // Products to render based on page mode (Home mode displays 15 initially, then expands on See More)
+  const displayedProducts = React.useMemo(() => {
+    if (showSidebarFilters) {
+      return products;
+    }
+    return showAllHomeProducts ? products : products.slice(0, 15);
+  }, [showSidebarFilters, showAllHomeProducts, products]);
 
   React.useEffect(() => {
     if (!hasMountedRef.current) {
@@ -220,7 +266,9 @@ export function ProductGrid({
               <span>আজকের পণ্যসমূহ</span>
               {!isLoading && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-[#FF6F0F]">
-                  {products.length}টি
+                  {!showAllHomeProducts && products.length > 15
+                    ? `১৫/${products.length}টি`
+                    : `${products.length}টি`}
                 </span>
               )}
             </h2>
@@ -461,7 +509,7 @@ export function ProductGrid({
       {/* 2. PRODUCTS GRID / SKELETON / EMPTY / ERROR */}
       {/* ========================================================= */}
       {isLoading ? (
-        <ProductGridSkeleton count={showSidebarFilters ? 8 : 10} />
+        <ProductGridSkeleton count={showSidebarFilters ? 8 : 15} />
       ) : isError ? (
         /* Error State */
         <div className="flex flex-col items-center justify-center p-12 text-center rounded-3xl bg-white border border-red-100 shadow-2xs my-4 space-y-3">
@@ -483,19 +531,74 @@ export function ProductGrid({
             পুনরায় চেষ্টা করুন
           </Button>
         </div>
-      ) : products.length > 0 ? (
+      ) : displayedProducts.length > 0 ? (
         /* Responsive Products Grid */
-        <div
-          className={
-            showSidebarFilters
-              ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4"
-              : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5"
-          }
-        >
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div
+            className={
+              showSidebarFilters
+                ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4"
+                : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5"
+            }
+          >
+            {displayedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Home Mode: "See More" (আরও দেখুন) Button / View All */}
+          {!showSidebarFilters && products.length > 15 && (
+            <div className="mt-8 pt-4 flex flex-col items-center justify-center gap-3">
+              {!showAllHomeProducts ? (
+                <>
+                  <Button
+                    onClick={handleSeeMore}
+                    disabled={isLoadingMore}
+                    className="px-8 py-3.5 h-auto rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-sm shadow-md shadow-orange-500/25 transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>পণ্য লোড হচ্ছে...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>আরও দেখুন (See More)</span>
+                        <ChevronDown className="h-4 w-4 stroke-[2.5]" />
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-slate-500">
+                    ১৫টি পণ্য দেখানো হচ্ছে (মোট {meta?.total || products.length}টির মধ্যে)
+                  </p>
+                </>
+              ) : (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <span className="text-xs font-semibold text-slate-700 bg-orange-50 border border-orange-200 px-4 py-2 rounded-full shadow-2xs">
+                    সব পণ্য প্রদর্শিত হচ্ছে ({products.length}টি)
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowAllHomeProducts(false);
+                      window.scrollTo({ top: 350, behavior: "smooth" });
+                    }}
+                    className="text-xs font-bold rounded-full border-slate-300 text-slate-700 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span>কম দেখুন (Show Less)</span>
+                    <ChevronUp className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                  <Link
+                    href="/products"
+                    className="text-xs font-bold text-[#FF6F0F] hover:underline px-3 py-2 cursor-pointer"
+                  >
+                    সব ফিল্টার ও সার্চ পেজে যান →
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       ) : (
         /* Empty State */
         <div className="flex flex-col items-center justify-center p-10 sm:p-14 text-center rounded-3xl bg-white border border-slate-100 shadow-2xs my-4 space-y-4">

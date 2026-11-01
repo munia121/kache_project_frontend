@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -75,11 +76,26 @@ export function AuthModal() {
   }, [resendTimer]);
 
   // Reset errors on tab switch
-  React.useEffect(() => {
-    setLoginError(null);
-    setRegisterError(null);
-    setOtpError(null);
-  }, [authModalView]);
+  // React.useEffect(() => {
+  //   setLoginError(null);
+  //   setRegisterError(null);
+  //   setOtpError(null);
+  // }, [authModalView]);
+
+
+
+
+// ট্যাব পরিবর্তনের হ্যান্ডলার যেখানে একসাথেই এররগুলো ক্লিয়ার হয়ে যাবে
+const handleTabSwitch = (view: typeof authModalView) => {
+  setLoginError(null);
+  setRegisterError(null);
+  setOtpError(null);
+  setAuthModalView(view);
+};
+
+
+
+
 
   // Handle Login Submission
   const handleLogin = async (e: React.FormEvent) => {
@@ -320,7 +336,7 @@ export function AuthModal() {
             <div className="mt-4 flex p-1 rounded-xl bg-slate-100/90 border border-slate-200/60">
               <button
                 type="button"
-                onClick={() => setAuthModalView("login")}
+                onClick={() => handleTabSwitch("login")}
                 className={`flex-1 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                   authModalView === "login"
                     ? "bg-white text-[#FF6F0F] shadow-sm"
@@ -331,7 +347,7 @@ export function AuthModal() {
               </button>
               <button
                 type="button"
-                onClick={() => setAuthModalView("register")}
+                onClick={() => handleTabSwitch("register")}
                 className={`flex-1 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                   authModalView === "register"
                     ? "bg-white text-[#FF6F0F] shadow-sm"
@@ -346,7 +362,7 @@ export function AuthModal() {
             <div className="mt-3 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setAuthModalView("register")}
+                onClick={() => handleTabSwitch ("register")}
                 className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-[#FF6F0F] font-medium transition-colors cursor-pointer"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />

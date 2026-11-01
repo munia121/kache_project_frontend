@@ -27,7 +27,7 @@ async function HomeContent({ searchParams }: HomePageProps) {
       typeof resolvedParams.area === "string" ? resolvedParams.area : undefined,
     areaId:
       typeof resolvedParams.areaId === "string" ? resolvedParams.areaId : undefined,
-    limit: 30,
+    limit: 50,
   };
 
   // Fetch initial data concurrently on the server

@@ -5,9 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { IProduct } from "@/types/product.types";
 import { MapPin, Heart, MessageCircle } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { productService } from "@/services/product.service";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: IProduct;
+  onFavoriteToggle?: (productId: string, isFavorited: boolean) => void;
 }
 
 function formatTimeAgo(dateString?: string): string {
@@ -30,19 +34,62 @@ function formatTimeAgo(dateString?: string): string {
   }
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const [isLiked, setIsLiked] = React.useState(false);
+export function ProductCard({ product, onFavoriteToggle }: ProductCardProps) {
+  const { isAuthenticated, openAuthModal } = useAuthStore();
+  const [isLiked, setIsLiked] = React.useState(
+    Boolean(product.isFavorited || product.isFavorite)
+  );
   const [likesCount, setLikesCount] = React.useState(product.likesCount ?? 0);
+  const [isPending, setIsPending] = React.useState(false);
 
-  const handleLikeClick = (e: React.MouseEvent) => {
+  React.useEffect(() => {
+    setIsLiked(Boolean(product.isFavorited || product.isFavorite));
+  }, [product.isFavorited, product.isFavorite]);
+
+  const handleLikeClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (isLiked) {
-      setIsLiked(false);
-      setLikesCount((prev) => Math.max(0, prev - 1));
-    } else {
-      setIsLiked(true);
-      setLikesCount((prev) => prev + 1);
+
+    if (!isAuthenticated) {
+      toast.warning("পছন্দের তালিকায় যুক্ত করতে অনুগ্রহ করে প্রথমে লগইন করুন");
+      openAuthModal("login");
+      return;
+    }
+
+    if (isPending) return;
+
+    const previousLiked = isLiked;
+    const nextLiked = !previousLiked;
+
+    // Optimistic toggle
+    setIsLiked(nextLiked);
+    setLikesCount((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
+    setIsPending(true);
+
+    try {
+      const res = await productService.toggleFavorite(product.id);
+      if (res?.success) {
+        const finalFavorited = res.data?.isFavorited ?? nextLiked;
+        setIsLiked(finalFavorited);
+        toast.success(
+          finalFavorited
+            ? "পণ্যটি পছন্দের তালিকায় যুক্ত করা হয়েছে"
+            : "পণ্যটি পছন্দের তালিকা থেকে সরানো হয়েছে"
+        );
+        onFavoriteToggle?.(product.id, finalFavorited);
+      } else {
+        // Revert on failure
+        setIsLiked(previousLiked);
+        setLikesCount((prev) => (previousLiked ? prev + 1 : Math.max(0, prev - 1)));
+        toast.error(res?.message || "পছন্দ আপডেট করতে সমস্যা হয়েছে");
+      }
+    } catch (err: any) {
+      // Revert on exception
+      setIsLiked(previousLiked);
+      setLikesCount((prev) => (previousLiked ? prev + 1 : Math.max(0, prev - 1)));
+      toast.error(err?.message || "পছন্দ আপডেট করতে ব্যর্থ হয়েছে");
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -116,6 +163,7 @@ export function ProductCard({ product }: ProductCardProps) {
           type="button"
           aria-label={isLiked ? "Remove favorite" : "Add to favorite"}
           onClick={handleLikeClick}
+          disabled={isPending}
           className={`absolute top-2 right-2 z-10 h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-xs transition-all duration-200 cursor-pointer ${
             isLiked
               ? "bg-rose-50 text-rose-500 shadow-sm"
@@ -123,7 +171,9 @@ export function ProductCard({ product }: ProductCardProps) {
           }`}
         >
           <Heart
-            className={`h-4 w-4 ${isLiked ? "fill-rose-500 stroke-rose-500" : ""}`}
+            className={`h-4 w-4 transition-transform active:scale-125 ${
+              isLiked ? "fill-rose-500 text-rose-500" : ""
+            }`}
           />
         </button>
 
@@ -183,7 +233,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 }`}
               >
                 <Heart
-                  className={`h-3 w-3 ${isLiked ? "fill-rose-500" : ""}`}
+                  className={`h-3 w-3 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`}
                 />
                 <span>{likesCount}</span>
               </span>

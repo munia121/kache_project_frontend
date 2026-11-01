@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { productService } from "@/services/product.service";
 import { categoryService } from "@/services/category.service";

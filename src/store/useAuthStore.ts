@@ -8,6 +8,7 @@ interface AuthState {
   user: IUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  _hasHydrated: boolean;
   hasHydrated: boolean;
   isAuthModalOpen: boolean;
   authModalView: AuthModalView;
@@ -23,8 +24,14 @@ interface AuthState {
   setAuthModalView: (view: AuthModalView) => void;
   setOtpEmail: (email: string) => void;
   setDevOtp: (devOtp?: string) => void;
-  setHasHydrated: (hydrated: boolean) => void;
+  setHasHydrated: (state: boolean) => void;
 }
+
+const dummyStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -32,7 +39,8 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      hasHydrated: false,
+      _hasHydrated: typeof window !== "undefined",
+      hasHydrated: typeof window !== "undefined",
       isAuthModalOpen: false,
       authModalView: "login",
       otpEmail: "",
@@ -52,9 +60,15 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
+      // setUser: (user: IUser) => {
+      //   set({ user });
+      // },
       setUser: (user: IUser) => {
-        set({ user });
-      },
+  set({
+    user,
+    isAuthenticated: true,
+  });
+},
 
       logout: () => {
         if (typeof window !== "undefined") {
@@ -100,15 +114,18 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      setHasHydrated: (hasHydrated: boolean) => {
+      setHasHydrated: (state: boolean) => {
         set({
-          hasHydrated,
+          _hasHydrated: state,
+          hasHydrated: state,
         });
       },
     }),
     {
       name: "kache-auth-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : dummyStorage
+      ),
       // Only persist user, token, and isAuthenticated
       partialize: (state) => ({
         user: state.user,
@@ -121,3 +138,24 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Synchronously restore state on client initial evaluation to eliminate any delay/reload
+if (typeof window !== "undefined") {
+  try {
+    const raw = localStorage.getItem("kache-auth-storage");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.state?.user && parsed?.state?.isAuthenticated) {
+        useAuthStore.setState({
+          user: parsed.state.user,
+          token: parsed.state.token || null,
+          isAuthenticated: true,
+          _hasHydrated: true,
+          hasHydrated: true,
+        });
+      }
+    }
+  } catch {
+    // ignore
+  }
+}

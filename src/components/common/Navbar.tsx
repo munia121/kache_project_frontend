@@ -18,6 +18,7 @@ import {
   LogOut,
   Store,
   Package,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,10 +33,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AuthModal } from "@/components/modules/auth/AuthModal";
 import { toast } from "sonner";
+import { IUser } from "@/types/user.types";
 
-export function Navbar() {
+interface NavbarProps {
+  initialUser?: IUser | null;
+}
+
+export function Navbar({ initialUser = null }: NavbarProps) {
   const router = useRouter();
   const [isMounted, setIsMounted] = React.useState(false);
+  const [hasLoggedOut, setHasLoggedOut] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const {
     searchQuery,
@@ -77,16 +88,39 @@ export function Navbar() {
   };
 
   const {
-    user,
-    isAuthenticated,
-    hasHydrated,
+    user: storeUser,
+    isAuthenticated: storeIsAuth,
     openAuthModal,
     logout,
+    setUser,
   } = useAuthStore();
 
+  // Reset hasLoggedOut if user logged in via client store
   React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    if (storeUser && hasLoggedOut) {
+      setHasLoggedOut(false);
+    }
+  }, [storeUser, hasLoggedOut]);
+
+  // Sync initialUser into Zustand store on mount if store is empty
+  React.useEffect(() => {
+    if (initialUser && !storeUser && !hasLoggedOut) {
+      setUser(initialUser);
+    }
+  }, [initialUser, storeUser, hasLoggedOut, setUser]);
+
+  // Active user: storeUser takes precedence; fallback to server initialUser if not logged out
+  const user = storeUser || (!hasLoggedOut ? initialUser : null);
+
+  // Authenticated flag: true on server/hydration if initialUser exists, or after mount if client store has user
+ 
+ 
+ 
+  // const isAuthenticated =
+  //   Boolean(user) && !hasLoggedOut && (Boolean(initialUser) || isMounted || Boolean(storeIsAuth));
+
+
+
 
   // Extract primary neighborhood name (e.g. "ধানমন্ডি" from "ধানমন্ডি, ঢাকা")
   const areaLabel = (selectedArea || "ঢাকা").split(",")[0].trim();
@@ -104,23 +138,26 @@ export function Navbar() {
   }, [user]);
 
   // Logout functionality:
-  // 1. Clear tokens from localStorage
-  // 2. Reset Zustand auth store
-  // 3. Show Sonner success toast
-  // 4. Redirect to home (/)
-  const handleLogout = () => {
+  // 1. Mark hasLoggedOut so UI instantly reflects logged-out state
+  // 2. Clear tokens from localStorage
+  // 3. Reset Zustand auth store
+  // 4. Clear cookies on server via authService.logout()
+  // 5. Show Sonner success toast and refresh server layout
+  const handleLogout = async () => {
+    setHasLoggedOut(true);
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("kache_access_token");
     }
     logout();
-    authService.logout();
+    await authService.logout();
     toast.success("সফলভাবে লগআউট হয়েছে");
     router.push("/");
+    router.refresh();
   };
 
   const handlePostAdClick = () => {
-    if (!isAuthenticated) {
+    if (!user) {
       toast.info("বিজ্ঞাপন দিতে প্রথমে লগইন বা রেজিস্টার করুন");
       openAuthModal("login");
     }
@@ -212,7 +249,7 @@ export function Navbar() {
               </button>
 
               {/* Dynamic Auth State */}
-              {isMounted && hasHydrated && isAuthenticated && user ? (
+              { user ? (
                 <>
                   {/* If user is USER role: show "বিক্রেতা হন" banner/link */}
                   {user.role === "USER" && (
@@ -299,6 +336,15 @@ export function Navbar() {
                           <span>আমার বিজ্ঞাপন</span>
                         </DropdownMenuItem>
 
+                        {/* "আমার পছন্দ" (/favorites) with Heart icon */}
+                        <DropdownMenuItem
+                          onClick={() => router.push("/favorites")}
+                          className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 transition-colors cursor-pointer"
+                        >
+                          <Heart className="h-4 w-4 text-slate-400" />
+                          <span>আমার পছন্দ</span>
+                        </DropdownMenuItem>
+
                         {/* If user.role === 'USER': "বিক্রেতা হন" (/become-seller) with Store icon */}
                         {user.role === "USER" && (
                           <DropdownMenuItem
@@ -331,7 +377,12 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => openAuthModal("login")}
+                  
+                  onClick={() => {
+   
+    openAuthModal("login");
+  }}
+                  
                   className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/50 rounded-full px-3 h-9 cursor-pointer"
                 >
                   <UserIcon className="h-4 w-4 mr-1 sm:mr-1.5" />
@@ -340,15 +391,7 @@ export function Navbar() {
               )}
 
               {/* Prominent Orange "বিজ্ঞাপন দিন" Button */}
-              {isMounted && hasHydrated && isAuthenticated && user?.role === "SELLER" ? (
-                <Link
-                  href="/post-ad"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
-                >
-                  <Plus className="h-4 w-4 stroke-[3]" />
-                  <span>বিজ্ঞাপন দিন</span>
-                </Link>
-              ) : isMounted && hasHydrated && isAuthenticated && user?.role === "USER" ? (
+              { user ? (
                 <Link
                   href="/post-ad"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"

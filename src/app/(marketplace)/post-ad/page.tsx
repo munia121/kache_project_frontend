@@ -4,9 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
-import { userService } from "@/services/user.service";
 import { PostAdForm } from "@/components/modules/products/PostAdForm";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Sparkles,
@@ -19,8 +17,7 @@ import {
 
 export default function PostAdPage() {
   const router = useRouter();
-  const { user, isAuthenticated, hasHydrated, setUser, openAuthModal } = useAuthStore();
-  const [isUpgradingRole, setIsUpgradingRole] = React.useState(false);
+  const { user, isAuthenticated, hasHydrated, openAuthModal } = useAuthStore();
 
   // Authentication check
   React.useEffect(() => {
@@ -30,27 +27,6 @@ export default function PostAdPage() {
       router.push("/");
     }
   }, [hasHydrated, isAuthenticated, openAuthModal, router]);
-
-  // Handle One-Click Role Upgrade from USER to SELLER
-  const handleQuickUpgradeToSeller = async () => {
-    try {
-      setIsUpgradingRole(true);
-      const res = await userService.becomeSeller({
-        termsAccepted: true,
-      });
-
-      if (res.success && res.data) {
-        setUser(res.data);
-        toast.success("অভিনন্দন! আপনার বিক্রেতা (Seller) অ্যাকাউন্ট সক্রিয় হয়েছে।");
-      }
-    } catch (err: unknown) {
-      const errorObj = err as { response?: { data?: { message?: string } }; message?: string };
-      const msg = errorObj.response?.data?.message || errorObj.message || "সেলার অ্যাকাউন্টে রূপান্তর করা যায়নি।";
-      toast.error(msg);
-    } finally {
-      setIsUpgradingRole(false);
-    }
-  };
 
   // Loading state while auth hydrates
   if (!hasHydrated || !isAuthenticated || !user) {
@@ -83,7 +59,7 @@ export default function PostAdPage() {
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 mt-3 max-w-lg mx-auto leading-relaxed">
-            কাছে মার্কেটপ্লেসে প্রতিবেশীদের কাছে বিজ্ঞাপন দিতে বিক্রেতা প্রোফাইল সক্রিয় করা প্রয়োজন। এটি সম্পূর্ণ বিনামূল্যে এবং মাত্র এক ক্লিকেই আপনি সেলার হতে পারেন।
+            কাছে মার্কেটপ্লেসে প্রতিবেশীদের কাছে বিজ্ঞাপন দিতে বিক্রেতা প্রোফাইল সক্রিয় করা প্রয়োজন। এটি সম্পূর্ণ বিনামূল্যে, সহজ বিক্রেতা অনবোর্ডিং সম্পন্ন করুন।
           </p>
 
           {/* Benefits checklist */}
@@ -105,31 +81,14 @@ export default function PostAdPage() {
             </div>
           </div>
 
-          {/* Upgrade Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button
-              onClick={handleQuickUpgradeToSeller}
-              disabled={isUpgradingRole}
-              className="w-full sm:w-auto px-8 py-3.5 h-12 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/25 cursor-pointer"
-            >
-              {isUpgradingRole ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>সক্রিয় হচ্ছে...</span>
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Store className="h-4 w-4" />
-                  <span>এক ক্লিকে বিক্রেতা হন</span>
-                </span>
-              )}
-            </Button>
-
+          {/* Upgrade Action Button */}
+          <div className="flex items-center justify-center pt-2">
             <Link
               href="/become-seller"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 h-12 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 h-12 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/25 transition-all cursor-pointer"
             >
-              <span>বিস্তারিত অনবোর্ডিং ফর্ম</span>
+              <Store className="h-4 w-4" />
+              <span>বিক্রেতা হিসেবে নিবন্ধন করুন</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
