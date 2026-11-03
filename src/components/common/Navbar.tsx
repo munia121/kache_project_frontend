@@ -19,7 +19,9 @@ import {
   Store,
   Package,
   Heart,
+  MessageSquare,
 } from "lucide-react";
+import { useChatNotification } from "@/context/ChatNotificationContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -111,6 +113,10 @@ export function Navbar({ initialUser = null }: NavbarProps) {
 
   // Active user: storeUser takes precedence; fallback to server initialUser if not logged out
   const user = storeUser || (!hasLoggedOut ? initialUser : null);
+  const isAuthenticated = Boolean(user && !hasLoggedOut);
+
+  // Real-time chat notification state
+  const { unreadCount, clearUnread } = useChatNotification();
 
   // Authenticated flag: true on server/hydration if initialUser exists, or after mount if client store has user
  
@@ -325,6 +331,25 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                         >
                           <UserIcon className="h-4 w-4 text-slate-400" />
                           <span>আমার প্রোফাইল</span>
+                        </DropdownMenuItem>
+
+                        {/* "চ্যাট ও মেসেজ" (/chat) with MessageSquare icon & unread badge */}
+                        <DropdownMenuItem
+                          onClick={() => {
+                            clearUnread();
+                            router.push("/chat");
+                          }}
+                          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <MessageSquare className="h-4 w-4 text-slate-400" />
+                            <span>চ্যাট ও মেসেজ</span>
+                          </div>
+                          {unreadCount > 0 && (
+                            <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full h-5 min-w-5 flex items-center justify-center px-1.5 shadow-xs">
+                              {unreadCount > 99 ? "99+" : unreadCount}
+                            </span>
+                          )}
                         </DropdownMenuItem>
 
                         {/* "আমার বিজ্ঞাপন" (/my-listings) with Package icon */}

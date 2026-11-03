@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { productService } from "@/services/product.service";
 import { categoryService } from "@/services/category.service";
 import { userService } from "@/services/user.service";
+import { chatService } from "@/services/chat.service";
 import { IProduct } from "@/types/product.types";
 import { Category } from "@/types/category.types";
 import { ILocationArea } from "@/types/user.types";
@@ -125,6 +126,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
   const [isTogglingStatus, setIsTogglingStatus] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isStartingChat, setIsStartingChat] = React.useState(false);
 
   // Categories & Areas for Edit Form
   const [categoriesList, setCategoriesList] = React.useState<Category[]>([]);
@@ -242,6 +244,57 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
       toast.error(err?.message || "পছন্দ আপডেট করতে ব্যর্থ হয়েছে");
     } finally {
       setIsPendingFavorite(false);
+    }
+  };
+
+  // ==========================================
+  // Handle Initiate Chat
+  // ==========================================
+  const handleInitiateChat = async () => {
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+
+    const sellerId = product?.sellerId || product?.seller?.id;
+    if (!product?.id || !sellerId) {
+      toast.error("বিক্রেতার তথ্য পাওয়া যায়নি");
+      return;
+    }
+
+    if (
+      user?.id &&
+      (user.id === product?.sellerId ||
+        user.id === product?.seller?.id ||
+        isOwner)
+    ) {
+      toast.info("এটি আপনার নিজের পোস্ট করা বিজ্ঞাপন");
+      return;
+    }
+
+    try {
+      setIsStartingChat(true);
+      const res = await chatService.initiateConversation(product.id, sellerId);
+      const conversation =
+        (res as { data?: { id?: string } })?.data ||
+        (res as unknown as { id?: string });
+      if (conversation?.id) {
+        router.push(`/chat?id=${conversation.id}`);
+      } else {
+        toast.error("চ্যাট শুরু করা সম্ভব হয়নি");
+      }
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "চ্যাট শুরু করতে সমস্যা হয়েছে"
+      );
+    } finally {
+      setIsStartingChat(false);
     }
   };
 
@@ -1025,16 +1078,15 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
               {/* Chat Button */}
               <Button
                 variant="outline"
-                onClick={() => {
-                  if (isOwner) {
-                    toast.info("এটি আপনার নিজের পোস্ট করা বিজ্ঞাপন");
-                  } else {
-                    toast.success("চ্যাট ফিচার শীঘ্রই কাছে অ্যাপে চালু হচ্ছে!");
-                  }
-                }}
+                disabled={isStartingChat}
+                onClick={handleInitiateChat}
                 className="w-full h-12 rounded-2xl border-slate-200 hover:border-orange-300 hover:bg-orange-50/50 text-slate-700 font-bold text-sm cursor-pointer flex items-center justify-center gap-2"
               >
-                <MessageCircle className="h-4 w-4 text-[#FF6F0F]" />
+                {isStartingChat ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-[#FF6F0F]" />
+                ) : (
+                  <MessageCircle className="h-4 w-4 text-[#FF6F0F]" />
+                )}
                 <span>মেসেজ করুন (Chat)</span>
               </Button>
             </div>

@@ -7,6 +7,7 @@ import { LocationPickerDialog } from "@/components/modules/locations/LocationPic
 import { Toaster } from "sonner";
 import { InitialUser } from "@/components/common/InitialUser";
 import { AuthModal } from "@/components/modules/auth/AuthModal";
+import { ChatNotificationProvider } from "@/context/ChatNotificationContext";
 
 
 const geistSans = Geist({
@@ -39,13 +40,15 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6F0F]">
-        {/* <Navbar initialUser={InitialUser} /> */}
-        <InitialUser />
+        <ChatNotificationProvider>
+          {/* <Navbar initialUser={InitialUser} /> */}
+          <InitialUser />
           <AuthModal />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <LocationPickerDialog />
-        <Toaster position="top-center" richColors />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <LocationPickerDialog />
+          <Toaster position="top-center" richColors />
+        </ChatNotificationProvider>
       </body>
     </html>
   );
