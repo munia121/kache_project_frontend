@@ -177,12 +177,16 @@ export const ChatNotificationProvider: React.FC<{
   );
 };
 
+const defaultChatNotificationContext: ChatNotificationContextType = {
+  unreadCount: 0,
+  setUnreadCount: () => {},
+  clearUnread: () => {},
+};
+
 export const useChatNotification = (): ChatNotificationContextType => {
   const context = useContext(ChatNotificationContext);
   if (!context) {
-    throw new Error(
-      "useChatNotification must be used within a ChatNotificationProvider"
-    );
+    return defaultChatNotificationContext;
   }
   return context;
 };

@@ -18,10 +18,11 @@ import {
   LogOut,
   Store,
   Package,
-  Heart,
+  Zap,
   MessageSquare,
+  Heart,
 } from "lucide-react";
-import { useChatNotification } from "@/context/ChatNotificationContext";
+import { DEMO_USERS, DemoUserAccount } from "@/constants/demo-users";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,6 +37,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AuthModal } from "@/components/modules/auth/AuthModal";
 import { toast } from "sonner";
 import { IUser } from "@/types/user.types";
+import { useChatNotification } from "@/context/ChatNotificationContext";
 
 interface NavbarProps {
   initialUser?: IUser | null;
@@ -160,6 +162,34 @@ export function Navbar({ initialUser = null }: NavbarProps) {
     toast.success("সফলভাবে লগআউট হয়েছে");
     router.push("/");
     router.refresh();
+  };
+
+  const [switchingRoleId, setSwitchingRoleId] = React.useState<string | null>(null);
+
+  const handleSwitchRole = async (account: DemoUserAccount) => {
+    if (user?.email === account.email) return;
+    try {
+      setSwitchingRoleId(account.id);
+      const res = await authService.login({
+        email: account.email,
+        password: account.password,
+      });
+      if (res.success && res.data) {
+        const { user: newUser, accessToken, token } = res.data;
+        const validToken = accessToken || token;
+        if (validToken) {
+          useAuthStore.getState().setAuth(newUser, validToken);
+          toast.success(`সুইচ করা হয়েছে: ${newUser.fullName} (${account.roleTitle})`);
+          router.refresh();
+        }
+      } else {
+        toast.error(res?.message || "রোল পরিবর্তন করা যায়নি");
+      }
+    } catch {
+      toast.error("রোল পরিবর্তন করতে সমস্যা হয়েছে");
+    } finally {
+      setSwitchingRoleId(null);
+    }
   };
 
   const handlePostAdClick = () => {
@@ -380,6 +410,34 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                             <span>বিক্রেতা হন</span>
                           </DropdownMenuItem>
                         )}
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="my-1 bg-slate-100" />
+
+                      {/* Fast Role Switch Group */}
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel className="px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                          <span>রোল সুইচ (Fast Switch)</span>
+                          <Zap className="h-3 w-3 text-[#FF6F0F]" />
+                        </DropdownMenuLabel>
+                        {DEMO_USERS.filter((acc) => acc.email !== user.email).map((acc) => (
+                          <DropdownMenuItem
+                            key={acc.id}
+                            disabled={switchingRoleId === acc.id}
+                            onClick={() => handleSwitchRole(acc)}
+                            className="flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+                          >
+                            <span className="truncate flex items-center gap-1.5">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${acc.badgeClass}`}>
+                                {acc.roleTitle}
+                              </span>
+                              <span className="truncate max-w-[110px]">{acc.fullName}</span>
+                            </span>
+                            <span className="text-[10px] text-[#FF6F0F] font-bold shrink-0">
+                              {switchingRoleId === acc.id ? "সুইচ..." : "সুইচ →"}
+                            </span>
+                          </DropdownMenuItem>
+                        ))}
                       </DropdownMenuGroup>
 
                       <DropdownMenuSeparator className="my-1 bg-slate-100" />
