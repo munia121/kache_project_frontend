@@ -118,9 +118,9 @@ export function FastLoginWidget() {
       {isOpen && (
         <div className="mb-3 w-84 sm:w-96 rounded-2xl bg-white shadow-2xl border border-slate-200/90 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
-          <div className="p-3.5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
+          <div className="p-3.5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-xs">
+              <div className="h-7 w-7 rounded-lg bg-linear-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-xs">
                 <Zap className="h-4 w-4 fill-white" />
               </div>
               <div>
@@ -174,7 +174,7 @@ export function FastLoginWidget() {
           </div>
 
           {/* User Account List */}
-          <div className="p-2.5 max-h-[340px] overflow-y-auto space-y-1.5 divide-y divide-slate-100">
+          <div className="p-2.5 max-h-85 overflow-y-auto space-y-1.5 divide-y divide-slate-100">
             {DEMO_USERS.map((acc) => {
               const isCurrent = user?.email === acc.email;
               const isLoading = loadingRoleId === acc.id;
@@ -191,7 +191,7 @@ export function FastLoginWidget() {
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                      className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br ${acc.avatarBg} text-white shadow-2xs`}
+                      className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 bg-linear-to-br ${acc.avatarBg} text-white shadow-2xs`}
                     >
                       {getRoleIcon(acc.role)}
                     </div>

@@ -174,7 +174,7 @@ export function Navbar() {
                 className="flex items-center gap-2 group transition-transform active:scale-95"
               >
                 {/* Karrot-inspired Brand Icon */}
-                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-sm shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200">
+                <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-sm shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200">
                   <ShoppingBag className="h-5 w-5 stroke-[2.2]" />
                 </div>
                 <div className="flex flex-col">
@@ -194,7 +194,7 @@ export function Navbar() {
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50/70 hover:bg-orange-100/80 text-slate-800 border border-orange-200/60 transition-all text-xs font-medium cursor-pointer"
               >
                 <MapPin className="h-3.5 w-3.5 text-[#FF6F0F] shrink-0" />
-                <span className="max-w-[120px] truncate">{areaLabel}</span>
+                <span className="max-w-30 truncate">{areaLabel}</span>
                 <ChevronDown className="h-3 w-3 text-slate-400" />
               </button>
             </div>
@@ -237,7 +237,7 @@ export function Navbar() {
                 className="sm:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-orange-50 text-slate-800 border border-orange-200 text-xs font-medium cursor-pointer"
               >
                 <MapPin className="h-3 w-3 text-[#FF6F0F]" />
-                <span className="max-w-[70px] truncate">{areaLabel}</span>
+                <span className="max-w-17.5 truncate">{areaLabel}</span>
                 <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
               </button>
 
@@ -266,11 +266,11 @@ export function Navbar() {
                         {user.avatar && (
                           <AvatarImage src={user.avatar} alt={user.fullName || "User"} />
                         )}
-                        <AvatarFallback className="bg-gradient-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-xs">
+                        <AvatarFallback className="bg-linear-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-xs">
                           {userInitials}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden sm:inline-block max-w-[90px] truncate text-xs font-bold text-slate-800">
+                      <span className="hidden sm:inline-block max-w-22.5 truncate text-xs font-bold text-slate-800">
                         {userFirstName}
                       </span>
                       <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -360,7 +360,7 @@ export function Navbar() {
                               <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${acc.badgeClass}`}>
                                 {acc.roleTitle}
                               </span>
-                              <span className="truncate max-w-[110px]">{acc.fullName}</span>
+                              <span className="truncate max-w-27.5">{acc.fullName}</span>
                             </span>
                             <span className="text-[10px] text-[#FF6F0F] font-bold shrink-0">
                               {switchingRoleId === acc.id ? "সুইচ..." : "সুইচ →"}
@@ -403,7 +403,7 @@ export function Navbar() {
                   href="/post-ad"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </Link>
               ) : isMounted && hasHydrated && isAuthenticated && user?.role === "USER" ? (
@@ -411,7 +411,7 @@ export function Navbar() {
                   href="/post-ad"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </Link>
               ) : (
@@ -420,7 +420,7 @@ export function Navbar() {
                   onClick={handlePostAdClick}
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </button>
               )}
