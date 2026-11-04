@@ -152,7 +152,7 @@ export function Navbar() {
   const handlePostAdClick = () => {
     if (!isAuthenticated) {
       toast.info("বিজ্ঞাপন দিতে প্রথমে লগইন বা রেজিস্টার করুন");
-      openAuthModal("login");
+      router.push("/login?redirect=/post-ad");
     }
   };
 
@@ -385,16 +385,14 @@ export function Navbar() {
                   </DropdownMenu>
                 </>
               ) : (
-                /* Unauthenticated Login Button */
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => openAuthModal("login")}
-                  className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/50 rounded-full px-3 h-9 cursor-pointer"
+                /* Unauthenticated Login Button -> Navigates to /login route */
+                <Link
+                  href="/login"
+                  className="inline-flex items-center text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 rounded-full px-3.5 h-9 transition-colors cursor-pointer"
                 >
                   <UserIcon className="h-4 w-4 mr-1 sm:mr-1.5" />
                   <span>লগইন</span>
-                </Button>
+                </Link>
               )}
 
               {/* Prominent Orange "বিজ্ঞাপন দিন" Button */}

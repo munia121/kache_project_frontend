@@ -26,10 +26,9 @@ export default function PostAdPage() {
   React.useEffect(() => {
     if (hasHydrated && !isAuthenticated) {
       toast.info("বিজ্ঞাপন দিতে প্রথমে লগইন বা রেজিস্টার করুন");
-      openAuthModal("login");
-      router.push("/");
+      router.push("/login?redirect=/post-ad");
     }
-  }, [hasHydrated, isAuthenticated, openAuthModal, router]);
+  }, [hasHydrated, isAuthenticated, router]);
 
   // Handle One-Click Role Upgrade from USER to SELLER
   const handleQuickUpgradeToSeller = async () => {
