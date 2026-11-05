@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
@@ -94,6 +95,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
   const {
     user: storeUser,
     isAuthenticated: storeIsAuth,
+    hasHydrated,
     openAuthModal,
     logout,
     setUser,
@@ -179,7 +181,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
         const validToken = accessToken || token;
         if (validToken) {
           useAuthStore.getState().setAuth(newUser, validToken);
-          toast.success(`সুইচ করা হয়েছে: ${newUser.fullName} (${account.roleTitle})`);
+          toast.success(`সুইচ করা হয়েছে: ${newUser.fullName} (${account.role})`);
           router.refresh();
         }
       } else {
@@ -195,7 +197,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
   const handlePostAdClick = () => {
     if (!user) {
       toast.info("বিজ্ঞাপন দিতে প্রথমে লগইন বা রেজিস্টার করুন");
-      openAuthModal("login");
+      router.push("/login?redirect=/post-ad");
     }
   };
 
@@ -217,7 +219,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 className="flex items-center gap-2 group transition-transform active:scale-95"
               >
                 {/* Karrot-inspired Brand Icon */}
-                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-sm shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200">
+                <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-sm shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200">
                   <ShoppingBag className="h-5 w-5 stroke-[2.2]" />
                 </div>
                 <div className="flex flex-col">
@@ -237,7 +239,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50/70 hover:bg-orange-100/80 text-slate-800 border border-orange-200/60 transition-all text-xs font-medium cursor-pointer"
               >
                 <MapPin className="h-3.5 w-3.5 text-[#FF6F0F] shrink-0" />
-                <span className="max-w-[120px] truncate">{areaLabel}</span>
+                <span className="max-w-30 truncate">{areaLabel}</span>
                 <ChevronDown className="h-3 w-3 text-slate-400" />
               </button>
             </div>
@@ -280,7 +282,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 className="sm:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-orange-50 text-slate-800 border border-orange-200 text-xs font-medium cursor-pointer"
               >
                 <MapPin className="h-3 w-3 text-[#FF6F0F]" />
-                <span className="max-w-[70px] truncate">{areaLabel}</span>
+                <span className="max-w-17.5 truncate">{areaLabel}</span>
                 <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
               </button>
 
@@ -309,11 +311,11 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                         {user.avatar && (
                           <AvatarImage src={user.avatar} alt={user.fullName || "User"} />
                         )}
-                        <AvatarFallback className="bg-gradient-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-xs">
+                        <AvatarFallback className="bg-linear-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-xs">
                           {userInitials}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden sm:inline-block max-w-[90px] truncate text-xs font-bold text-slate-800">
+                      <span className="hidden sm:inline-block max-w-22.5 truncate text-xs font-bold text-slate-800">
                         {userFirstName}
                       </span>
                       <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -420,7 +422,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                           <span>রোল সুইচ (Fast Switch)</span>
                           <Zap className="h-3 w-3 text-[#FF6F0F]" />
                         </DropdownMenuLabel>
-                        {DEMO_USERS.filter((acc) => acc.email !== user.email).map((acc) => (
+                        {DEMO_USERS.filter((acc) => acc.email !== user?.email).map((acc) => (
                           <DropdownMenuItem
                             key={acc.id}
                             disabled={switchingRoleId === acc.id}
@@ -428,10 +430,10 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                             className="flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
                           >
                             <span className="truncate flex items-center gap-1.5">
-                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${acc.badgeClass}`}>
-                                {acc.roleTitle}
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${acc.badgeClass || ""}`}>
+                                {acc.role}
                               </span>
-                              <span className="truncate max-w-[110px]">{acc.fullName}</span>
+                              <span className="truncate max-w-27.5">{acc.fullName}</span>
                             </span>
                             <span className="text-[10px] text-[#FF6F0F] font-bold shrink-0">
                               {switchingRoleId === acc.id ? "সুইচ..." : "সুইচ →"}
@@ -456,30 +458,31 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                   </DropdownMenu>
                 </>
               ) : (
-                /* Unauthenticated Login Button */
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  
-                  onClick={() => {
-   
-    openAuthModal("login");
-  }}
-                  
-                  className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/50 rounded-full px-3 h-9 cursor-pointer"
+                /* Unauthenticated Login Button -> Navigates to /login route */
+                <Link
+                  href="/login"
+                  className="inline-flex items-center text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 rounded-full px-3.5 h-9 transition-colors cursor-pointer"
                 >
                   <UserIcon className="h-4 w-4 mr-1 sm:mr-1.5" />
                   <span>লগইন</span>
-                </Button>
+                </Link>
               )}
 
               {/* Prominent Orange "বিজ্ঞাপন দিন" Button */}
-              { user ? (
+              {isMounted && hasHydrated && isAuthenticated && user?.role === "SELLER" ? (
                 <Link
                   href="/post-ad"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
+                  <span>বিজ্ঞাপন দিন</span>
+                </Link>
+              ) : isMounted && hasHydrated && isAuthenticated && user?.role === "USER" ? (
+                <Link
+                  href="/post-ad"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
+                >
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </Link>
               ) : (
@@ -488,7 +491,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                   onClick={handlePostAdClick}
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </button>
               )}

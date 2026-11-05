@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import { Navbar } from "@/components/share/Navbar";
 
 export default function PostAdPage() {
   const router = useRouter();
@@ -23,10 +24,9 @@ export default function PostAdPage() {
   React.useEffect(() => {
     if (hasHydrated && !isAuthenticated) {
       toast.info("বিজ্ঞাপন দিতে প্রথমে লগইন বা রেজিস্টার করুন");
-      openAuthModal("login");
-      router.push("/");
+      router.push("/login?redirect=/post-ad");
     }
-  }, [hasHydrated, isAuthenticated, openAuthModal, router]);
+  }, [hasHydrated, isAuthenticated, router]);
 
   // Loading state while auth hydrates
   if (!hasHydrated || !isAuthenticated || !user) {
@@ -99,7 +99,11 @@ export default function PostAdPage() {
 
   // If role is SELLER or ADMIN: Render the Full Ad Creation Form
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    
+    <div> 
+      <Navbar></Navbar>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      
       <div className="mb-6 space-y-1">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-[#FF6F0F] text-xs font-bold">
           <Sparkles className="h-3.5 w-3.5" />
@@ -112,8 +116,9 @@ export default function PostAdPage() {
           আপনার পাড়ার ক্রেতাদের কাছে দ্রুত বিক্রি করতে সঠিক তথ্য ও ছবি প্রদান করুন
         </p>
       </div>
-
+      
       <PostAdForm />
+    </div>
     </div>
   );
 }

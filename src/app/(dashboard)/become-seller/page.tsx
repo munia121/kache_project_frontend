@@ -42,11 +42,10 @@ export default function BecomeSellerPage() {
     if (isMounted && hasHydrated) {
       if (!isAuthenticated) {
         toast.info("সেলার অনবোর্ডিং করতে প্রথমে লগইন করুন");
-        openAuthModal("login");
-        router.push("/");
+        router.push("/login?redirect=/become-seller");
       }
     }
-  }, [isMounted, hasHydrated, isAuthenticated, openAuthModal, router]);
+  }, [isMounted, hasHydrated, isAuthenticated, router]);
 
   // Load areas if user has no area set
   React.useEffect(() => {

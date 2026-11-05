@@ -3,17 +3,17 @@ import { UserRole } from "@/types/user.types";
 export interface DemoUserAccount {
   id: string;
   role: UserRole;
-  roleTitle: string;
-  bnRoleTitle: string;
-  fullName: string;
+  roleTitle?: string;
+  bnRoleTitle?: string;
+  fullName?: string;
   email: string;
-  phone: string;
-  shopOrDetails: string;
+  phone?: string;
+  shopOrDetails?: string;
   password: string;
-  badgeClass: string;
-  accentColor: string;
-  avatarBg: string;
-  description: string;
+  badgeClass?: string;
+  accentColor?: string;
+  avatarBg?: string;
+  description?: string;
 }
 
 export const DEMO_USERS: DemoUserAccount[] = [

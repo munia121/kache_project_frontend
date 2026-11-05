@@ -89,11 +89,10 @@ export default function ProfilePage() {
     if (isMounted && hasHydrated) {
       if (!isAuthenticated) {
         toast.info("প্রোফাইল দেখতে প্রথমে লগইন করুন");
-        openAuthModal("login");
-        router.push("/");
+        router.push("/login?redirect=/profile");
       }
     }
-  }, [isMounted, hasHydrated, isAuthenticated, openAuthModal, router]);
+  }, [isMounted, hasHydrated, isAuthenticated, router]);
 
   // Fetch fresh profile data from backend on mount (only when authenticated)
   React.useEffect(() => {
@@ -311,7 +310,7 @@ export default function ProfilePage() {
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-4 text-center">
         <p className="text-sm text-slate-600 mb-3">অনুগ্রহ করে আপনার অ্যাকাউন্টে লগইন করুন</p>
         <Button
-          onClick={() => openAuthModal("login")}
+          onClick={() => router.push("/login?redirect=/profile")}
           className="bg-[#FF6F0F] hover:bg-[#F95738] text-white rounded-full px-6 text-xs font-bold"
         >
           লগইন করুন

@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Footer } from "@/components/common/Footer";
+import { Navbar } from "@/components/share/Navbar";
+import { Footer } from "@/components/share/Footer";
 import { LocationPickerDialog } from "@/components/modules/locations/LocationPickerDialog";
-import { FastLoginWidget } from "@/components/common/FastLoginWidget";
+import { FastLoginWidget } from "@/components/share/FastLoginWidget";
 import { Toaster } from "sonner";
-import { InitialUser } from "@/components/common/InitialUser";
+// import { InitialUser } from "@/components/common/InitialUser";
 import { ChatNotificationProvider } from "@/context/ChatNotificationContext";
 
 const geistSans = Geist({
@@ -22,7 +24,14 @@ export const metadata: Metadata = {
   title: "কাছে (Kache) - আপনার পাড়ার বিশ্বস্ত লোকাল মার্কেটপ্লেস",
   description:
     "কাছে (Kache) হলো Karrot-অনুপ্রাণিত আধুনিক কমিউনিটি মার্কেটপ্লেস। আপনার আশেপাশের বিশ্বস্ত প্রতিবেশীদের সাথে সহজে ব্যবহৃত বা নতুন পণ্য কেনাবেচা করুন।",
-  keywords: ["কাছে", "Kache", "Marketplace", "Dhaka", "Classifieds", "Buy and Sell"],
+  keywords: [
+    "কাছে",
+    "Kache",
+    "Marketplace",
+    "Dhaka",
+    "Classifieds",
+    "Buy and Sell",
+  ],
 };
 
 export default function RootLayout({
@@ -36,14 +45,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6F0F]">
-        <ChatNotificationProvider>
-          <InitialUser />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <LocationPickerDialog />
-          <FastLoginWidget />
-          <Toaster position="top-center" richColors />
-        </ChatNotificationProvider>
+        <main className="flex-1">{children}</main>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );
