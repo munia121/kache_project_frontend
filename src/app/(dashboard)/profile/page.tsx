@@ -378,12 +378,12 @@ export default function ProfilePage() {
                 {user?.avatar && (
                   <AvatarImage src={user.avatar} alt={user?.fullName || "User"} />
                 )}
-                <AvatarFallback className="bg-gradient-to-br from-[#FF6F0F] to-[#F95738] text-white text-2xl font-black">
+                <AvatarFallback className="bg-linear-to-br from-[#FF6F0F] to-[#F95738] text-white text-2xl font-black">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-white" title="সক্রিয় অ্যাকাউন্ট">
-                <CheckCircle2 className="h-4 w-4 stroke-[3]" />
+                <CheckCircle2 className="h-4 w-4 stroke-3" />
               </div>
             </div>
 
@@ -618,7 +618,7 @@ export default function ProfilePage() {
 
           {/* If role is USER: Display Seller Onboarding Call-to-Action Card */}
           {user?.role === "USER" && (
-            <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50/40 rounded-3xl p-6 border border-orange-200/80 shadow-sm relative overflow-hidden transition-all duration-300 ease-in-out">
+            <div className="bg-linear-to-br from-orange-50 via-white to-orange-50/40 rounded-3xl p-6 border border-orange-200/80 shadow-sm relative overflow-hidden transition-all duration-300 ease-in-out">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1.5 max-w-md">
                   <div className="inline-flex items-center gap-1 text-xs font-bold text-[#FF6F0F] bg-white px-2.5 py-0.5 rounded-full border border-orange-200 shadow-2xs">
@@ -856,7 +856,7 @@ export default function ProfilePage() {
       {/* ROLE SWITCH CONFIRMATION DIALOG */}
       {/* ========================================================= */}
       <Dialog open={isConfirmSwitchOpen} onOpenChange={setIsConfirmSwitchOpen}>
-        <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white shadow-2xl border-slate-200 z-[60]">
+        <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white shadow-2xl border-slate-200 z-60">
           <DialogHeader className="space-y-2 pb-2">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
