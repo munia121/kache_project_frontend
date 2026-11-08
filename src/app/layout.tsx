@@ -9,6 +9,8 @@ import { FastLoginWidget } from "@/components/share/FastLoginWidget";
 import { Toaster } from "sonner";
 // import { InitialUser } from "@/components/common/InitialUser";
 import { ChatNotificationProvider } from "@/context/ChatNotificationContext";
+import { CartProvider } from "@/context/CartContext";
+import { CartSheet } from "@/components/modules/cart/CartSheet";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,7 +47,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6F0F]">
-        <main className="flex-1">{children}</main>
+        <ChatNotificationProvider>
+          <CartProvider>
+            <main className="flex-1">{children}</main>
+            <CartSheet />
+          </CartProvider>
+        </ChatNotificationProvider>
         <Toaster position="top-center" richColors />
       </body>
     </html>

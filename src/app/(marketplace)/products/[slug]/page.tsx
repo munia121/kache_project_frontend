@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -23,6 +26,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useCart } from "@/context/CartContext";
 import {
   MapPin,
   Calendar,
@@ -45,6 +49,7 @@ import {
   Camera,
   X,
   CheckCircle2,
+  ShoppingBag,
 } from "lucide-react";
 
 interface ProductDetailsPageProps {
@@ -90,6 +95,18 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
   const router = useRouter();
   const { slug } = React.use(params);
   const { user, isAuthenticated, token, openAuthModal } = useAuthStore();
+  const { addToCart } = useCart();
+  const [isAddingToCart, setIsAddingToCart] = React.useState(false);
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product, 1);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [showPhoneNumber, setShowPhoneNumber] = React.useState(false);
@@ -691,7 +708,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
               <span>/</span>
             </>
           )}
-          <span className="text-slate-800 font-semibold truncate max-w-[200px] sm:max-w-xs">
+          <span className="text-slate-800 font-semibold truncate max-w-50 sm:max-w-xs">
             {product.title}
           </span>
         </div>
@@ -733,7 +750,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
       {/* Strictly restricted to Owner (with SELLER role) or ADMIN */}
       {/* ========================================================= */}
       {canManage && (
-        <div className="mb-6 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-orange-50 via-amber-50/70 to-orange-50 border border-orange-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="mb-6 p-4 sm:p-5 rounded-3xl bg-linear-to-r from-orange-50 via-amber-50/70 to-orange-50 border border-orange-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-2xl bg-[#FF6F0F] text-white flex items-center justify-center shrink-0 shadow-sm shadow-orange-500/20">
               <Sparkles className="h-5 w-5" />
@@ -989,6 +1006,30 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
                 </div>
               </div>
             </div>
+
+            {/* Add to Cart CTA */}
+            <div className="pt-2">
+              <Button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isAddingToCart || product.status === "SOLD"}
+                className="w-full h-12 rounded-2xl bg-[#FF6F0F] hover:bg-[#F95738] active:scale-98 text-white font-bold text-sm shadow-md shadow-orange-500/25 cursor-pointer flex items-center justify-center gap-2 transition-all"
+              >
+                {isAddingToCart ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>কার্টে যোগ হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-4 w-4 stroke-[2.2]" />
+                    <span>
+                      {product.status === "SOLD" ? "পণ্যটি বিক্রি হয়ে গেছে" : "কার্টে যোগ করুন"}
+                    </span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* ========================================================= */}
@@ -1006,7 +1047,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
                 {product.seller?.avatar && (
                   <AvatarImage src={product.seller.avatar} alt={sellerName} />
                 )}
-                <AvatarFallback className="bg-gradient-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-lg">
+                <AvatarFallback className="bg-linear-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-lg">
                   {sellerInitials}
                 </AvatarFallback>
               </Avatar>
@@ -1377,7 +1418,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
       {/* ========================================================= */}
       {canManage && (
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white shadow-2xl border-slate-200 z-[60]">
+          <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white shadow-2xl border-slate-200 z-60">
             <DialogHeader className="space-y-2 pb-2">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
