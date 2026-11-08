@@ -35,6 +35,7 @@ import {
   Search,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Package,
 } from "lucide-react";
 
@@ -321,6 +322,14 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <Link
+        className="inline-flex items-center gap-2 text-xs md:text-sm font-medium text-slate-600 hover:text-[#FF6F0F] transition-colors py-2 px-3 rounded-xl hover:bg-slate-100 w-fit mb-4"
+        href="/"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span>হোমে ফিরে যান</span>
+      </Link>
+
       {/* Page Title & Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 gap-4 border-b border-slate-200">
         <div>

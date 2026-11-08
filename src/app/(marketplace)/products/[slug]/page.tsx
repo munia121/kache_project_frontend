@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
+import WhatsAppChatButton from "@/components/modules/products/WhatsAppChatButton";
 import {
   MapPin,
   Calendar,
@@ -1130,6 +1131,14 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
                 )}
                 <span>মেসেজ করুন (Chat)</span>
               </Button>
+
+              {/* WhatsApp Chat Button */}
+              <WhatsAppChatButton
+                sellerPhone={product.seller?.phone}
+                sellerName={sellerName}
+                productTitle={product.title}
+                productPrice={product.price}
+              />
             </div>
           </div>
         </div>
