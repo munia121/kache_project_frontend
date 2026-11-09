@@ -22,6 +22,7 @@ import {
   Zap,
   MessageSquare,
   Heart,
+  ShieldCheck,
 } from "lucide-react";
 import { DEMO_USERS, DemoUserAccount } from "@/constants/demo-users";
 import { Button } from "@/components/ui/button";
@@ -434,7 +435,24 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                             className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50/60 hover:bg-emerald-100/70 transition-colors cursor-pointer"
                           >
                             <Store className="h-4 w-4 text-emerald-600" />
-                            <span>বিক্রেতা হন</span>
+                            <span>
+                              {user.sellerStatus === "PENDING"
+                                ? "সেলার আবেদন (পর্যালোচনাধীন)"
+                                : user.sellerStatus === "REJECTED"
+                                ? "সেলার আবেদন (বাতিলকৃত)"
+                                : "বিক্রেতা হন"}
+                            </span>
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* If user is ADMIN or SUPER_ADMIN: Admin Seller Applications link */}
+                        {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
+                          <DropdownMenuItem
+                            onClick={() => router.push("/admin/seller-applications")}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-purple-700 bg-purple-50/70 hover:bg-purple-100 transition-colors cursor-pointer"
+                          >
+                            <ShieldCheck className="h-4 w-4 text-purple-600" />
+                            <span>সেলার আবেদনসমূহ (Admin)</span>
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuGroup>
