@@ -37,11 +37,10 @@ export default function MyListingsPage() {
     if (isMounted && hasHydrated) {
       if (!isAuthenticated) {
         toast.info("বিজ্ঞাপন দেখতে প্রথমে লগইন করুন");
-        openAuthModal("login");
-        router.push("/");
+        router.push("/login?redirect=/my-listings");
       }
     }
-  }, [isMounted, hasHydrated, isAuthenticated, openAuthModal, router]);
+  }, [isMounted, hasHydrated, isAuthenticated, router]);
 
   // Fetch Listings for any authenticated user (SELLER, USER, or ADMIN)
   React.useEffect(() => {

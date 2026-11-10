@@ -1,5 +1,6 @@
 export type UserRole = "USER" | "SELLER" | "ADMIN" | "SUPER_ADMIN";
 export type UserStatus = "ACTIVE" | "BANNED" | "SUSPENDED";
+export type SellerStatus = "NONE" | "PENDING" | "APPROVED" | "REJECTED";
 
 export interface ILocationDivision {
   id: string;
@@ -33,15 +34,21 @@ export interface ILocationArea {
 }
 
 // User interface supporting both `User` and `IUser` conventions
-export interface User {
+export interface IUser {
   id: string;
   fullName: string;
-  phone: string;
-  email?: string | null;
+  email?: string;
+  phoneNumber?: string;
+  phone?: string;
+  whatsappNumber?: string;
   role: UserRole;
+  sellerStatus?: SellerStatus;
+  shopName?: string;
+  shopAddress?: string;
+  sellerAppliedAt?: string;
+  rejectionReason?: string;
   status?: UserStatus;
   avatar?: string | null;
-  shopName?: string | null;
   bio?: string | null;
   areaId?: string | null;
   area?: string | null;
@@ -55,7 +62,7 @@ export interface User {
 }
 
 // Alias for backwards compatibility
-export type IUser = User;
+export type User = IUser;
 
 export interface ApiResponse<T = unknown> {
   statusCode: number;
@@ -66,7 +73,8 @@ export interface ApiResponse<T = unknown> {
     page: number;
     limit: number;
     total: number;
-    totalPage: number;
+    totalPage?: number;
+    totalPages?: number;
   };
 }
 
@@ -105,18 +113,58 @@ export interface ResendOtpPayload {
 export interface UpdateProfilePayload {
   fullName?: string;
   phone?: string;
+  phoneNumber?: string;
+  whatsappNumber?: string;
   avatar?: string | null;
   areaId?: string | null;
   address?: string | null;
   role?: UserRole;
   shopName?: string | null;
+  shopAddress?: string | null;
   bio?: string | null;
 }
 
 export interface BecomeSellerPayload {
   termsAccepted: true;
   shopName?: string | null;
+  shopAddress?: string | null;
   bio?: string | null;
+  phoneNumber?: string;
+  phone?: string;
+  whatsappNumber?: string;
+}
+
+export interface ReviewSellerApplicationPayload {
+  status: "APPROVED" | "REJECTED";
+  rejectionReason?: string;
+}
+
+export interface SellerApplicationQuery {
+  status?: SellerStatus | "ALL";
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ISellerApplication {
+  id: string;
+  fullName: string;
+  email?: string;
+  phoneNumber?: string;
+  phone?: string;
+  whatsappNumber?: string;
+  role: UserRole;
+  sellerStatus: SellerStatus;
+  shopName?: string;
+  shopAddress?: string;
+  bio?: string;
+  sellerAppliedAt?: string;
+  rejectionReason?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  area?: string;
+  address?: string;
+  locationArea?: ILocationArea | null;
 }
 
 export interface IMyProductListing {

@@ -158,6 +158,54 @@ export const resendOtp = async (payload: { email: string }) => {
 };
 
 /**
+ * Initiate Forgot Password by requesting an OTP to user's email
+ * POST /auth/forgot-password
+ */
+export const forgotPassword = async (payload: { email: string }) => {
+  try {
+    const res = await fetch(`${getAuthBaseUrl()}/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "পাসওয়ার্ড রিসেট ওটিপি পাঠানো যায়নি।",
+    };
+  }
+};
+
+/**
+ * Reset password using OTP code and new password
+ * POST /auth/reset-password
+ */
+export const resetPassword = async (payload: {
+  email: string;
+  code: string;
+  newPassword: string;
+}) => {
+  try {
+    const res = await fetch(`${getAuthBaseUrl()}/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "পাসওয়ার্ড রিসেট করা যায়নি।",
+    };
+  }
+};
+
+/**
  * Logout user and clear tokens from cookies
  */
 export const logout = async () => {

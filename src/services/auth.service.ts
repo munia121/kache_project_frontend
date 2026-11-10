@@ -1,4 +1,13 @@
-import { register, login, verifyOtp, resendOtp, logout, getMe } from "./auth";
+import {
+  register,
+  login,
+  verifyOtp,
+  resendOtp,
+  forgotPassword,
+  resetPassword,
+  logout,
+  getMe,
+} from "./auth";
 import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ApiResponse, IUser, UpdateProfilePayload } from "@/types/user.types";
@@ -8,6 +17,8 @@ export const authService = {
   login,
   verifyOtp,
   resendOtp,
+  forgotPassword,
+  resetPassword,
   logout,
   getProfile: getMe,
 

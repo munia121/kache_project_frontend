@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
@@ -18,8 +19,12 @@ import {
   LogOut,
   Store,
   Package,
+  Zap,
+  MessageSquare,
   Heart,
+  ShieldCheck,
 } from "lucide-react";
+import { DEMO_USERS, DemoUserAccount } from "@/constants/demo-users";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,8 +39,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AuthModal } from "@/components/modules/auth/AuthModal";
 import { toast } from "sonner";
 import { IUser } from "@/types/user.types";
+import { useChatNotification } from "@/context/ChatNotificationContext";
+import { useCart } from "@/context/CartContext";
 
-interface NavbarProps {
+export interface NavbarProps {
   initialUser?: IUser | null;
 }
 
@@ -57,6 +64,9 @@ export function Navbar({ initialUser = null }: NavbarProps) {
 
   const [searchInput, setSearchInput] = React.useState(searchQuery);
 
+  // Consume CartContext for bag icon & dynamic badge
+  const { cartCount, setIsCartOpen } = useCart();
+
   // Sync search input if searchQuery changes from outside (e.g. filter reset)
   React.useEffect(() => {
     setSearchInput(searchQuery);
@@ -77,7 +87,11 @@ export function Navbar({ initialUser = null }: NavbarProps) {
     if (e) e.preventDefault();
     const trimmed = searchInput.trim();
     setSearchQuery(trimmed);
-    if (typeof window !== "undefined" && window.location.pathname !== "/" && window.location.pathname !== "/products") {
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/" &&
+      window.location.pathname !== "/products"
+    ) {
       router.push("/");
     }
   };
@@ -90,6 +104,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
   const {
     user: storeUser,
     isAuthenticated: storeIsAuth,
+    hasHydrated,
     openAuthModal,
     logout,
     setUser,
@@ -111,16 +126,10 @@ export function Navbar({ initialUser = null }: NavbarProps) {
 
   // Active user: storeUser takes precedence; fallback to server initialUser if not logged out
   const user = storeUser || (!hasLoggedOut ? initialUser : null);
+  const isAuthenticated = Boolean(user && !hasLoggedOut);
 
-  // Authenticated flag: true on server/hydration if initialUser exists, or after mount if client store has user
- 
- 
- 
-  // const isAuthenticated =
-  //   Boolean(user) && !hasLoggedOut && (Boolean(initialUser) || isMounted || Boolean(storeIsAuth));
-
-
-
+  // Real-time chat notification state
+  const { unreadCount, clearUnread } = useChatNotification();
 
   // Extract primary neighborhood name (e.g. "ধানমন্ডি" from "ধানমন্ডি, ঢাকা")
   const areaLabel = (selectedArea || "ঢাকা").split(",")[0].trim();
@@ -137,12 +146,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
     return user.fullName.trim().slice(0, 2).toUpperCase() || "U";
   }, [user]);
 
-  // Logout functionality:
-  // 1. Mark hasLoggedOut so UI instantly reflects logged-out state
-  // 2. Clear tokens from localStorage
-  // 3. Reset Zustand auth store
-  // 4. Clear cookies on server via authService.logout()
-  // 5. Show Sonner success toast and refresh server layout
+  // Logout functionality
   const handleLogout = async () => {
     setHasLoggedOut(true);
     if (typeof window !== "undefined") {
@@ -156,10 +160,38 @@ export function Navbar({ initialUser = null }: NavbarProps) {
     router.refresh();
   };
 
+  const [switchingRoleId, setSwitchingRoleId] = React.useState<string | null>(null);
+
+  const handleSwitchRole = async (account: DemoUserAccount) => {
+    if (user?.email === account.email) return;
+    try {
+      setSwitchingRoleId(account.id);
+      const res = await authService.login({
+        email: account.email,
+        password: account.password,
+      });
+      if (res.success && res.data) {
+        const { user: newUser, accessToken, token } = res.data;
+        const validToken = accessToken || token;
+        if (validToken) {
+          useAuthStore.getState().setAuth(newUser, validToken);
+          toast.success(`সুইচ করা হয়েছে: ${newUser.fullName} (${account.role})`);
+          router.refresh();
+        }
+      } else {
+        toast.error(res?.message || "রোল পরিবর্তন করা যায়নি");
+      }
+    } catch {
+      toast.error("রোল পরিবর্তন করতে সমস্যা হয়েছে");
+    } finally {
+      setSwitchingRoleId(null);
+    }
+  };
+
   const handlePostAdClick = () => {
     if (!user) {
       toast.info("বিজ্ঞাপন দিতে প্রথমে লগইন বা রেজিস্টার করুন");
-      openAuthModal("login");
+      router.push("/login?redirect=/post-ad");
     }
   };
 
@@ -181,7 +213,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 className="flex items-center gap-2 group transition-transform active:scale-95"
               >
                 {/* Karrot-inspired Brand Icon */}
-                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-sm shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200">
+                <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[#FF6F0F] to-[#F95738] flex items-center justify-center text-white shadow-sm shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200">
                   <ShoppingBag className="h-5 w-5 stroke-[2.2]" />
                 </div>
                 <div className="flex flex-col">
@@ -201,7 +233,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50/70 hover:bg-orange-100/80 text-slate-800 border border-orange-200/60 transition-all text-xs font-medium cursor-pointer"
               >
                 <MapPin className="h-3.5 w-3.5 text-[#FF6F0F] shrink-0" />
-                <span className="max-w-[120px] truncate">{areaLabel}</span>
+                <span className="max-w-30 truncate">{areaLabel}</span>
                 <ChevronDown className="h-3 w-3 text-slate-400" />
               </button>
             </div>
@@ -244,12 +276,28 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 className="sm:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-orange-50 text-slate-800 border border-orange-200 text-xs font-medium cursor-pointer"
               >
                 <MapPin className="h-3 w-3 text-[#FF6F0F]" />
-                <span className="max-w-[70px] truncate">{areaLabel}</span>
+                <span className="max-w-17.5 truncate">{areaLabel}</span>
                 <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
               </button>
 
+              {/* Shopping Bag Icon Button with Dynamic Badge */}
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                title="শপিং কার্ট"
+                aria-label="শপিং কার্ট"
+                className="relative p-2 rounded-full text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 transition-colors cursor-pointer"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#FF6F0F] text-white text-[10px] font-bold rounded-full h-5 min-w-5 flex items-center justify-center">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
+              </button>
+
               {/* Dynamic Auth State */}
-              { user ? (
+              {user ? (
                 <>
                   {/* If user is USER role: show "বিক্রেতা হন" banner/link */}
                   {user.role === "USER" && (
@@ -273,11 +321,11 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                         {user.avatar && (
                           <AvatarImage src={user.avatar} alt={user.fullName || "User"} />
                         )}
-                        <AvatarFallback className="bg-gradient-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-xs">
+                        <AvatarFallback className="bg-linear-to-br from-[#FF6F0F] to-[#F95738] text-white font-bold text-xs">
                           {userInitials}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden sm:inline-block max-w-[90px] truncate text-xs font-bold text-slate-800">
+                      <span className="hidden sm:inline-block max-w-22.5 truncate text-xs font-bold text-slate-800">
                         {userFirstName}
                       </span>
                       <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -318,6 +366,22 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                       <DropdownMenuSeparator className="my-1 bg-slate-100" />
 
                       <DropdownMenuGroup>
+                        {/* "আমার কার্ট" (/cart) with ShoppingBag icon & cartCount badge */}
+                        <DropdownMenuItem
+                          onClick={() => router.push("/cart")}
+                          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <ShoppingBag className="h-4 w-4 text-slate-400" />
+                            <span>আমার কার্ট</span>
+                          </div>
+                          {cartCount > 0 && (
+                            <span className="bg-[#FF6F0F] text-white text-[10px] font-bold rounded-full h-5 min-w-5 flex items-center justify-center px-1">
+                              {cartCount > 99 ? "99+" : cartCount}
+                            </span>
+                          )}
+                        </DropdownMenuItem>
+
                         {/* "আমার প্রোফাইল" (/profile) with User icon */}
                         <DropdownMenuItem
                           onClick={() => router.push("/profile")}
@@ -325,6 +389,25 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                         >
                           <UserIcon className="h-4 w-4 text-slate-400" />
                           <span>আমার প্রোফাইল</span>
+                        </DropdownMenuItem>
+
+                        {/* "চ্যাট ও মেসেজ" (/chat) with MessageSquare icon & unread badge */}
+                        <DropdownMenuItem
+                          onClick={() => {
+                            clearUnread();
+                            router.push("/chat");
+                          }}
+                          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <MessageSquare className="h-4 w-4 text-slate-400" />
+                            <span>চ্যাট ও মেসেজ</span>
+                          </div>
+                          {unreadCount > 0 && (
+                            <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full h-5 min-w-5 flex items-center justify-center px-1.5 shadow-xs">
+                              {unreadCount > 99 ? "99+" : unreadCount}
+                            </span>
+                          )}
                         </DropdownMenuItem>
 
                         {/* "আমার বিজ্ঞাপন" (/my-listings) with Package icon */}
@@ -352,9 +435,54 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                             className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50/60 hover:bg-emerald-100/70 transition-colors cursor-pointer"
                           >
                             <Store className="h-4 w-4 text-emerald-600" />
-                            <span>বিক্রেতা হন</span>
+                            <span>
+                              {user.sellerStatus === "PENDING"
+                                ? "সেলার আবেদন (পর্যালোচনাধীন)"
+                                : user.sellerStatus === "REJECTED"
+                                ? "সেলার আবেদন (বাতিলকৃত)"
+                                : "বিক্রেতা হন"}
+                            </span>
                           </DropdownMenuItem>
                         )}
+
+                        {/* If user is ADMIN or SUPER_ADMIN: Admin Seller Applications link */}
+                        {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
+                          <DropdownMenuItem
+                            onClick={() => router.push("/admin/seller-applications")}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-purple-700 bg-purple-50/70 hover:bg-purple-100 transition-colors cursor-pointer"
+                          >
+                            <ShieldCheck className="h-4 w-4 text-purple-600" />
+                            <span>সেলার আবেদনসমূহ (Admin)</span>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="my-1 bg-slate-100" />
+
+                      {/* Fast Role Switch Group */}
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel className="px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                          <span>রোল সুইচ (Fast Switch)</span>
+                          <Zap className="h-3 w-3 text-[#FF6F0F]" />
+                        </DropdownMenuLabel>
+                        {DEMO_USERS.filter((acc) => acc.email !== user?.email).map((acc) => (
+                          <DropdownMenuItem
+                            key={acc.id}
+                            disabled={switchingRoleId === acc.id}
+                            onClick={() => handleSwitchRole(acc)}
+                            className="flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+                          >
+                            <span className="truncate flex items-center gap-1.5">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${acc.badgeClass || ""}`}>
+                                {acc.role}
+                              </span>
+                              <span className="truncate max-w-27.5">{acc.fullName}</span>
+                            </span>
+                            <span className="text-[10px] text-[#FF6F0F] font-bold shrink-0">
+                              {switchingRoleId === acc.id ? "সুইচ..." : "সুইচ →"}
+                            </span>
+                          </DropdownMenuItem>
+                        ))}
                       </DropdownMenuGroup>
 
                       <DropdownMenuSeparator className="my-1 bg-slate-100" />
@@ -373,30 +501,31 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                   </DropdownMenu>
                 </>
               ) : (
-                /* Unauthenticated Login Button */
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  
-                  onClick={() => {
-   
-    openAuthModal("login");
-  }}
-                  
-                  className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/50 rounded-full px-3 h-9 cursor-pointer"
+                /* Unauthenticated Login Button -> Navigates to /login route */
+                <Link
+                  href="/login"
+                  className="inline-flex items-center text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 rounded-full px-3.5 h-9 transition-colors cursor-pointer"
                 >
                   <UserIcon className="h-4 w-4 mr-1 sm:mr-1.5" />
                   <span>লগইন</span>
-                </Button>
+                </Link>
               )}
 
               {/* Prominent Orange "বিজ্ঞাপন দিন" Button */}
-              { user ? (
+              {isMounted && hasHydrated && isAuthenticated && user?.role === "SELLER" ? (
                 <Link
                   href="/post-ad"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
+                  <span>বিজ্ঞাপন দিন</span>
+                </Link>
+              ) : isMounted && hasHydrated && isAuthenticated && user?.role === "USER" ? (
+                <Link
+                  href="/post-ad"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
+                >
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </Link>
               ) : (
@@ -405,7 +534,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                   onClick={handlePostAdClick}
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#FF6F0F] hover:bg-[#F95738] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md shadow-orange-500/30 transition-all duration-200 cursor-pointer"
                 >
-                  <Plus className="h-4 w-4 stroke-[3]" />
+                  <Plus className="h-4 w-4 stroke-3" />
                   <span>বিজ্ঞাপন দিন</span>
                 </button>
               )}
@@ -433,7 +562,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-slate-400 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -443,8 +572,10 @@ export function Navbar({ initialUser = null }: NavbarProps) {
         </div>
       </header>
 
-      {/* Global Auth Modal */}
+      {/* Auth Modal fallback */}
       <AuthModal />
     </>
   );
 }
+
+export default Navbar;
