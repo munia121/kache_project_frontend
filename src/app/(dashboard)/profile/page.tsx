@@ -537,14 +537,14 @@ export default function ProfilePage() {
                   </span>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between">
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <span className="flex items-center gap-2">
                     <span>⚠️ এখনও কোনো এলাকা নির্বাচন করা হয়নি। সেলার হিসেবে অনবোর্ডিং এর জন্য একটি এলাকা সেট করুন।</span>
                   </span>
                   <Button
                     size="sm"
                     onClick={handleOpenAreaModal}
-                    className="bg-[#FF6F0F] hover:bg-[#F95738] text-white text-xs font-bold rounded-xl cursor-pointer"
+                    className="bg-[#FF6F0F] hover:bg-[#F95738] text-white text-xs font-bold rounded-xl cursor-pointer shrink-0 self-start sm:self-center"
                   >
                     এলাকা বাছুন
                   </Button>
@@ -757,7 +757,7 @@ export default function ProfilePage() {
       {/* AREA SELECTION MODAL */}
       {/* ========================================================= */}
       <Dialog open={isAreaModalOpen} onOpenChange={setIsAreaModalOpen}>
-        <DialogContent className="sm:max-w-md p-5 rounded-3xl bg-white shadow-2xl border-slate-200">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-2xl border-slate-200">
           <DialogHeader className="space-y-1.5 pb-2">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-orange-100 text-[#FF6F0F]">
@@ -865,7 +865,7 @@ export default function ProfilePage() {
       {/* ROLE SWITCH CONFIRMATION DIALOG */}
       {/* ========================================================= */}
       <Dialog open={isConfirmSwitchOpen} onOpenChange={setIsConfirmSwitchOpen}>
-        <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white shadow-2xl border-slate-200 z-60">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white shadow-2xl border-slate-200 z-60">
           <DialogHeader className="space-y-2 pb-2">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">

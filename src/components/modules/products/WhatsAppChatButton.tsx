@@ -82,7 +82,8 @@ export function WhatsAppChatButton({
       )}
     >
       <WhatsAppIcon className="h-5 w-5 fill-current shrink-0" />
-      <span>হোয়াটসঅ্যাপে চ্যাট করুন (WhatsApp)</span>
+      <span>হোয়াটসঅ্যাপে চ্যাট করুন</span>
+      <span className="hidden sm:inline">(WhatsApp)</span>
     </a>
   );
 }

@@ -140,8 +140,8 @@ const handleSaveProfile = async (e: FormEvent) => {
 
     return (
        <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0 rounded-3xl bg-white shadow-2xl border-slate-200 overflow-hidden">
-          <DialogHeader className="p-6 pb-4 border-b border-slate-100 shrink-0">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-lg max-h-[90vh] flex flex-col p-0 rounded-2xl sm:rounded-3xl bg-white shadow-2xl border-slate-200 overflow-hidden">
+          <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-slate-100 shrink-0">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-2xl bg-orange-100 text-[#FF6F0F] flex items-center justify-center shrink-0">
                 <Edit3 className="h-5 w-5" />
@@ -158,7 +158,7 @@ const handleSaveProfile = async (e: FormEvent) => {
           </DialogHeader>
 
           <form onSubmit={handleSaveProfile} className="flex-1 flex flex-col min-h-0">
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
               {/* Full Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1">

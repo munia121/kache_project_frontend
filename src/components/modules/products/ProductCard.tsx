@@ -136,7 +136,7 @@ export function ProductCard({ product, onFavoriteToggle }: ProductCardProps) {
   return (
     <Link
       href={`/products/${productSlug}`}
-      className="group flex flex-col bg-white rounded-2xl border border-slate-100 hover:border-orange-200/80 p-2.5 sm:p-3 shadow-2xs hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden"
+      className="group flex flex-col bg-white rounded-xl sm:rounded-2xl border border-slate-100 hover:border-orange-200/80 p-2 sm:p-3 shadow-2xs hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden"
     >
       {/* 1:1 Aspect Ratio Image Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-100 mb-2.5">
@@ -206,20 +206,20 @@ export function ProductCard({ product, onFavoriteToggle }: ProductCardProps) {
         </div>
 
         {/* Price & Engagement Footer */}
-        <div className="mt-1 pt-1.5 border-t border-slate-100 flex items-center justify-between">
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+        <div className="mt-1 pt-1.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1">
+          <div className="flex items-baseline gap-1 min-w-0">
+            <span className="text-xs sm:text-base font-bold text-slate-900 tracking-tight truncate">
               {formattedPrice}
             </span>
             {product.isNegotiable && (
-              <span className="text-[10px] text-emerald-600 font-medium">
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-medium shrink-0">
                 দরদামযোগ্য
               </span>
             )}
           </div>
 
           {/* Social Stats: Chats and Likes */}
-          <div className="flex items-center gap-2 text-[11px] text-slate-400">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-400 shrink-0">
             {(product.chatsCount ?? 0) > 0 && (
               <span className="inline-flex items-center gap-0.5 hover:text-slate-600">
                 <MessageCircle className="h-3 w-3" />

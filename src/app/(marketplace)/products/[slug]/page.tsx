@@ -694,7 +694,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       {/* Top Breadcrumb & Actions */}
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-200/60 text-xs text-slate-500">
+      <div className="flex flex-wrap items-center justify-between pb-3 sm:pb-4 mb-4 border-b border-slate-200/60 text-xs text-slate-500 gap-2">
         <div className="flex items-center gap-1.5 truncate">
           <Link href="/" className="hover:text-[#FF6F0F] transition-colors flex items-center gap-1">
             <ChevronLeft className="h-3.5 w-3.5" />
@@ -789,10 +789,11 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
             {/* Update Post Button */}
             <Button
               onClick={handleOpenEditModal}
-              className="rounded-full bg-[#FF6F0F] hover:bg-[#F95738] text-white text-xs font-bold px-4 h-9 shadow-sm shadow-orange-500/25 cursor-pointer flex items-center gap-1.5"
+              className="rounded-full bg-[#FF6F0F] hover:bg-[#F95738] text-white text-xs font-bold px-3.5 sm:px-4 h-9 shadow-sm shadow-orange-500/25 cursor-pointer flex items-center gap-1.5"
             >
-              <Edit3 className="h-3.5 w-3.5" />
-              <span>বিজ্ঞাপন আপডেট করুন (Update Post)</span>
+              <Edit3 className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">বিজ্ঞাপন আপডেট করুন (Update Post)</span>
+              <span className="sm:hidden">আপডেট করুন</span>
             </Button>
 
             {/* Hide / Unhide Button */}
@@ -1150,7 +1151,7 @@ function ProductDetailsContent({ params }: ProductDetailsPageProps) {
       {/* ========================================================= */}
       {canManage && (
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-          <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 rounded-3xl bg-white shadow-2xl border-slate-200 overflow-hidden">
+          <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-xl max-h-[90vh] flex flex-col p-0 rounded-2xl sm:rounded-3xl bg-white shadow-2xl border-slate-200 overflow-hidden">
             <DialogHeader className="p-6 pb-4 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-2xl bg-orange-100 text-[#FF6F0F] flex items-center justify-center shrink-0">

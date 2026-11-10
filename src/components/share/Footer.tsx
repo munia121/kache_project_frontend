@@ -59,7 +59,7 @@ export function Footer() {
           </div>
 
           {/* Navigation Links */}
-          <div className="flex flex-wrap justify-center gap-6 text-xs font-medium text-slate-600">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 text-xs font-medium text-slate-600">
             <Link href="#" className="hover:text-[#FF6F0F] transition-colors">
               আমাদের সম্পর্কে
             </Link>

@@ -92,7 +92,7 @@ export function SuggestedKeywords() {
         {/* Left Label */}
         <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">
           <Sparkles className="h-3.5 w-3.5 text-[#FF6F0F]" />
-          <span className="hidden xs:inline">জনপ্রিয়:</span>
+          <span className="hidden sm:inline">জনপ্রিয়:</span>
         </div>
 
         {/* Scroll Left Button */}

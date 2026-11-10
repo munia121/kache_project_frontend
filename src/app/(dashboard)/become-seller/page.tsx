@@ -240,7 +240,7 @@ export default function BecomeSellerPage() {
           {/* STATE 1: ALREADY APPROVED / ACTIVE SELLER                     */}
           {/* ============================================================== */}
           {effectiveStatus === "APPROVED" && (
-            <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/90 shadow-sm text-center animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-12 border border-slate-200/90 shadow-sm text-center animate-in fade-in duration-300">
               <div className="inline-flex items-center justify-center h-20 w-20 rounded-3xl bg-emerald-50 text-emerald-600 mb-5 ring-8 ring-emerald-50/50">
                 <ShieldCheck className="h-10 w-10" />
               </div>
@@ -300,9 +300,9 @@ export default function BecomeSellerPage() {
           {/* STATE 2: PENDING APPROVAL                                     */}
           {/* ============================================================== */}
           {effectiveStatus === "PENDING" && (
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-in fade-in duration-300">
               {/* Header Banner */}
-              <div className="px-6 sm:px-10 py-8 bg-gradient-to-r from-amber-500 via-orange-500 to-[#FF6F0F] text-white">
+              <div className="px-4 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-amber-500 via-orange-500 to-[#FF6F0F] text-white">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white mb-3">
                   <Clock className="h-3.5 w-3.5 animate-pulse" />
                   <span>আবেদন পর্যালোচনায় রয়েছে</span>
@@ -315,7 +315,7 @@ export default function BecomeSellerPage() {
                 </p>
               </div>
 
-              <div className="p-6 sm:p-10 space-y-6">
+              <div className="p-4 sm:p-10 space-y-6">
                 {/* Status Notice Card */}
                 <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-start gap-4">
                   <div className="h-10 w-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
@@ -440,9 +440,9 @@ export default function BecomeSellerPage() {
               ) || Boolean(user.shopName && (user.phone || user.phoneNumber));
 
             return (
-              <div className="bg-white rounded-3xl border border-rose-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
+              <div className="bg-white rounded-2xl sm:rounded-3xl border border-rose-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
                 {/* Header Banner */}
-                <div className="px-6 sm:px-10 py-8 bg-gradient-to-r from-rose-700 via-rose-600 to-red-600 text-white">
+                <div className="px-4 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-rose-700 via-rose-600 to-red-600 text-white">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white mb-3">
                     {isRevokedNotice ? (
                       <UserX className="h-3.5 w-3.5" />
@@ -467,7 +467,7 @@ export default function BecomeSellerPage() {
                   </p>
                 </div>
 
-                <div className="p-6 sm:p-10 space-y-6">
+                <div className="p-4 sm:p-10 space-y-6">
                   {/* Rejection / Revocation Reason Box */}
                   <div className="p-5 rounded-2xl bg-rose-50 border border-rose-200">
                     <h3 className="text-xs font-bold text-rose-900 uppercase tracking-wider flex items-center gap-2">
@@ -544,9 +544,9 @@ export default function BecomeSellerPage() {
           {/* STATE 4: APPLICATION FORM (NONE or RE-APPLYING)               */}
           {/* ============================================================== */}
           {(effectiveStatus === "NONE" || isReapplying) && (
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
               {/* Banner Header */}
-              <div className="px-6 sm:px-10 py-8 bg-gradient-to-r from-[#FF6F0F] to-[#F95738] text-white">
+              <div className="px-4 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-[#FF6F0F] to-[#F95738] text-white">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white mb-3">
                   <Sparkles className="h-3.5 w-3.5" />
                   <span>
@@ -561,7 +561,7 @@ export default function BecomeSellerPage() {
                 </p>
               </div>
 
-              <form onSubmit={handleOnboardSubmit} className="p-6 sm:p-10 space-y-6">
+              <form onSubmit={handleOnboardSubmit} className="p-4 sm:p-10 space-y-6">
                 {/* Reapply Notice */}
                 {isReapplying && (
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between">

@@ -120,7 +120,7 @@ export function LocationPickerDialog() {
 
   return (
     <Dialog open={isLocationModalOpen} onOpenChange={setIsLocationModalOpen}>
-      <DialogContent className="sm:max-w-md p-5 rounded-3xl bg-white shadow-2xl border-slate-200">
+      <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-2xl border-slate-200">
         <DialogHeader className="space-y-1.5 pb-2">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-orange-50 text-[#FF6F0F]">

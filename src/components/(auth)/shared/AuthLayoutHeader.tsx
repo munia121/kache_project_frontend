@@ -22,7 +22,7 @@ const AuthLayoutHeader = () => {
               Kache
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 font-medium leading-none mt-1">
+          <p className="hidden sm:block text-[11px] text-slate-500 font-medium leading-none mt-1">
             পাড়ার বিশ্বস্ত মার্কেটপ্লেস
           </p>
         </div>

@@ -11,18 +11,18 @@ export function HeroBanner() {
 
   return (
     <section className="bg-gradient-to-b from-orange-50/70 via-orange-50/30 to-transparent border-b border-orange-100/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-gradient-to-r from-orange-500 via-[#FF6F0F] to-[#F95738] rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-orange-500/15 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 bg-gradient-to-r from-orange-500 via-[#FF6F0F] to-[#F95738] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-lg shadow-orange-500/15 relative overflow-hidden">
           {/* Background decorative circles */}
           <div className="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-white/10 blur-xl pointer-events-none" />
           <div className="absolute left-1/3 -top-10 w-36 h-36 rounded-full bg-white/10 blur-lg pointer-events-none" />
 
-          <div className="relative z-10 space-y-3 text-center md:text-left max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold text-white">
+          <div className="relative z-10 space-y-2.5 sm:space-y-3 text-center md:text-left max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] sm:text-xs font-semibold text-white">
               <Sparkles className="h-3.5 w-3.5" />
               <span>আপনার পাড়ার আধুনিক লোকাল মার্কেটপ্লেস</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-snug sm:leading-tight">
               <span className="underline decoration-white/30 underline-offset-4">
                 {areaLabel}
               </span>{" "}
@@ -34,7 +34,7 @@ export function HeroBanner() {
           </div>
 
           {/* Quick Actions in Hero */}
-          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
+          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 shrink-0 w-full md:w-auto">
             <button
               type="button"
               onClick={() => setIsLocationModalOpen(true)}
