@@ -113,10 +113,10 @@ export function FastLoginWidget() {
   };
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 print:hidden font-sans">
+    <div className="fixed bottom-4 left-2 sm:left-4 z-50 print:hidden font-sans max-w-[calc(100vw-1rem)] sm:max-w-none">
       {/* Popover Card */}
       {isOpen && (
-        <div className="mb-3 w-84 sm:w-96 rounded-2xl bg-white shadow-2xl border border-slate-200/90 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="mb-3 w-[calc(100vw-2rem)] sm:w-96 max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200/90 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
           <div className="p-3.5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
             <div className="flex items-center gap-2">

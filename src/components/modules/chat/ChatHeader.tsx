@@ -86,7 +86,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         <Link
           href={productHref}
           target="_blank"
-          className="group flex items-center gap-2 p-1.5 pr-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-orange-50/50 hover:border-orange-200 transition-all max-w-[200px] sm:max-w-[260px] shrink-0"
+          className="group flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 pr-2 sm:pr-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-orange-50/50 hover:border-orange-200 transition-all max-w-[125px] sm:max-w-[260px] shrink-0"
         >
           {productImg && (
             <div className="relative h-9 w-9 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-white">

@@ -471,8 +471,8 @@ function ChatInner() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto w-full p-2 sm:p-4 md:p-6 h-[calc(100vh-5rem)]">
-      <div className="grid grid-cols-12 h-full bg-white rounded-3xl shadow-xs border border-slate-200 overflow-hidden">
+    <div className="max-w-7xl mx-auto w-full p-1.5 sm:p-4 md:p-6 h-[calc(100dvh-4.5rem)] sm:h-[calc(100vh-5rem)]">
+      <div className="grid grid-cols-12 h-full bg-white rounded-2xl sm:rounded-3xl shadow-xs border border-slate-200 overflow-hidden">
         {/* Left Sidebar (Conversation List) */}
         <div
           className={`h-full col-span-12 md:col-span-5 lg:col-span-4 min-h-0 ${

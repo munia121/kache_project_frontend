@@ -98,7 +98,7 @@ export function ProductsClientView({
               </p>
             </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-center">
+            <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
               <Button
                 variant="outline"
                 size="sm"

@@ -315,7 +315,7 @@ const handleTabSwitch = (view: typeof authModalView) => {
 
   return (
     <Dialog open={isAuthModalOpen} onOpenChange={(open) => !open && closeAuthModal()}>
-      <DialogContent className="sm:max-w-[460px] p-0 overflow-hidden rounded-3xl bg-white shadow-2xl border-slate-200/90 gap-0">
+      <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-[460px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl sm:rounded-3xl bg-white shadow-2xl border-slate-200/90 gap-0">
         {/* Karrot-inspired Header with Sunset Accent */}
         <div className="relative px-6 pt-6 pb-4 bg-gradient-to-b from-orange-50/80 via-orange-50/30 to-white border-b border-orange-100/50">
           <div className="flex items-center gap-3">

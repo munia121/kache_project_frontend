@@ -965,7 +965,7 @@ export default function AdminSellerApplicationsPage() {
 
           {/* Pagination Footer */}
           {totalPages > 1 && (
-            <div className="p-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 text-center sm:text-left">
               <span>
                 মোট <strong>{totalCount}</strong> টি আবেদনের মধ্যে পৃষ্ঠা <strong>{page}</strong> / {totalPages}
               </span>
@@ -1003,7 +1003,7 @@ export default function AdminSellerApplicationsPage() {
       {/* MODAL 1: APPLICATION IN-DEPTH DETAILS                           */}
       {/* ================================================================ */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-xl rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 shadow-2xl">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-4 sm:p-8 bg-white border border-slate-200 shadow-2xl">
           <DialogHeader>
             <div className="flex items-center justify-between gap-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
@@ -1177,7 +1177,7 @@ export default function AdminSellerApplicationsPage() {
       {/* MODAL 2: REJECTION REASON DIALOG                                 */}
       {/* ================================================================ */}
       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
-        <DialogContent className="max-w-md rounded-3xl p-6 sm:p-7 bg-white border border-rose-200 shadow-2xl">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-4 sm:p-7 bg-white border border-rose-200 shadow-2xl">
           <DialogHeader>
             <div className="h-10 w-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-2">
               <AlertTriangle className="h-5 w-5" />
@@ -1260,7 +1260,7 @@ export default function AdminSellerApplicationsPage() {
       {/* MODAL 3: SELLER REVOCATION DIALOG                                */}
       {/* ================================================================ */}
       <Dialog open={isRevokeOpen} onOpenChange={setIsRevokeOpen}>
-        <DialogContent className="max-w-md rounded-3xl p-6 sm:p-7 bg-white border border-rose-300 shadow-2xl">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-4 sm:p-7 bg-white border border-rose-300 shadow-2xl">
           <DialogHeader>
             <div className="h-10 w-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-2">
               <UserX className="h-5 w-5" />

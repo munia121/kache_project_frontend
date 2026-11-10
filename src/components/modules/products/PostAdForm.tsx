@@ -307,7 +307,7 @@ export function PostAdForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* 1. IMAGES UPLOADER SECTION */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200/90 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -325,7 +325,7 @@ export function PostAdForm() {
         </div>
 
         {/* Thumbnail Preview Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 pt-1">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 pt-1">
           {/* Add Image Trigger Button */}
           {images.length < 5 && (
             <button
@@ -392,7 +392,7 @@ export function PostAdForm() {
       </div>
 
       {/* 2. TITLE & CATEGORY SECTION */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
         {/* Title */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -482,7 +482,7 @@ export function PostAdForm() {
       </div>
 
       {/* 3. PRICING & CONDITION SECTION */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200/90 shadow-sm space-y-5">
         <h2 className="text-base sm:text-lg font-bold text-slate-900">
           মূল্য ও পণ্যের অবস্থা
         </h2>
@@ -559,7 +559,7 @@ export function PostAdForm() {
       </div>
 
       {/* 4. LOCATION & AREA HIERARCHY */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200/90 shadow-sm space-y-4">
         <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-[#FF6F0F]" />
           <div>
@@ -644,7 +644,7 @@ export function PostAdForm() {
       </div>
 
       {/* 5. DESCRIPTION */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-3">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200/90 shadow-sm space-y-3">
         <label className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1">
           <span>পণ্যের বিবরণ</span>
           <span className="text-red-500">*</span>
