@@ -201,6 +201,22 @@ export function Navbar({ initialUser = null }: NavbarProps) {
     return user.fullName.trim().split(/\s+/)[0];
   }, [user]);
 
+  // Robust, case-insensitive role & seller status resolution
+  const userRole = String(user?.role || "").trim().toUpperCase();
+  const sellerStatus = String(user?.sellerStatus || "").trim().toUpperCase();
+  const hasShop = Boolean(user?.shopName);
+
+  // A user is recognized as a seller if role is SELLER, sellerStatus is APPROVED, or user has an active shop registered
+  const isSeller = Boolean(
+    user && (userRole === "SELLER" || sellerStatus === "APPROVED" || hasShop)
+  );
+
+  // Condition for "দোকানের অর্ডারসমূহ": hidden ONLY when user?.role === 'USER' (or if not logged in), visible to all other roles
+  const canViewSellerOrders = Boolean(user && user.role !== "USER");
+
+  // Regular buyers/users: role is USER and not approved as a seller
+  const isRegularUser = Boolean(user && userRole === "USER" && !isSeller);
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
@@ -299,8 +315,8 @@ export function Navbar({ initialUser = null }: NavbarProps) {
               {/* Dynamic Auth State */}
               {user ? (
                 <>
-                  {/* If user is USER role: show "বিক্রেতা হন" banner/link on desktop/tablet */}
-                  {user.role === "USER" && (
+                  {/* If user is regular buyer: show "বিক্রেতা হন" banner/link on desktop/tablet */}
+                  {isRegularUser && (
                     <Link
                       href="/become-seller"
                       className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100/90 text-[#FF6F0F] border border-orange-200/80 text-xs font-bold transition-all shadow-2xs hover:shadow-xs"
@@ -345,9 +361,9 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                               </p>
                               <span
                                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 border ${
-                                  user.role === "SELLER"
+                                  isSeller
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                    : user.role === "ADMIN" || user.role === "SUPER_ADMIN"
+                                    : userRole === "ADMIN" || userRole === "SUPER_ADMIN"
                                     ? "bg-purple-50 text-purple-700 border-purple-200"
                                     : "bg-orange-50 text-[#FF6F0F] border-orange-200"
                                 }`}
@@ -418,6 +434,26 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                           <span>আমার বিজ্ঞাপন</span>
                         </DropdownMenuItem>
 
+                        {/* "দোকানের অর্ডারসমূহ" (/dashboard/seller/orders): hidden ONLY when user?.role === 'USER' (or if not logged in), visible to all other roles */}
+                        {user && user.role !== "USER" && (
+                          <DropdownMenuItem
+                            onClick={() => router.push("/dashboard/seller/orders")}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-[#FF6F0F] bg-orange-50/80 hover:bg-orange-100 transition-colors cursor-pointer"
+                          >
+                            <Store className="h-4 w-4 text-[#FF6F0F]" />
+                            <span>দোকানের অর্ডারসমূহ</span>
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* "আমার অর্ডারসমূহ" (/my-orders) with ShoppingBag icon */}
+                        <DropdownMenuItem
+                          onClick={() => router.push("/my-orders")}
+                          className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-[#FF6F0F] hover:bg-orange-50/70 transition-colors cursor-pointer"
+                        >
+                          <ShoppingBag className="h-4 w-4 text-slate-400" />
+                          <span>আমার অর্ডারসমূহ</span>
+                        </DropdownMenuItem>
+
                         {/* "আমার পছন্দ" (/favorites) with Heart icon */}
                         <DropdownMenuItem
                           onClick={() => router.push("/favorites")}
@@ -427,8 +463,8 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                           <span>আমার পছন্দ</span>
                         </DropdownMenuItem>
 
-                        {/* If user.role === 'USER': "বিক্রেতা হন" (/become-seller) with Store icon */}
-                        {user.role === "USER" && (
+                        {/* If user is regular buyer: "বিক্রেতা হন" (/become-seller) with Store icon */}
+                        {isRegularUser && (
                           <DropdownMenuItem
                             onClick={() => router.push("/become-seller")}
                             className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50/60 hover:bg-emerald-100/70 transition-colors cursor-pointer"
@@ -445,7 +481,7 @@ export function Navbar({ initialUser = null }: NavbarProps) {
                         )}
 
                         {/* If user is ADMIN or SUPER_ADMIN: Admin Seller Applications link */}
-                        {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
+                        {(userRole === "ADMIN" || userRole === "SUPER_ADMIN") && (
                           <DropdownMenuItem
                             onClick={() => router.push("/admin/seller-applications")}
                             className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-purple-700 bg-purple-50/70 hover:bg-purple-100 transition-colors cursor-pointer"

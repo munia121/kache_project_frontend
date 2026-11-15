@@ -365,6 +365,17 @@ export default function ProfilePage() {
             </Button>
           )}
 
+          {/* "দোকানের অর্ডারসমূহ": hidden ONLY when user?.role === 'USER' (or if not logged in), visible to all other roles */}
+          {user && user.role !== "USER" && (
+            <Link
+              href="/dashboard/seller/orders"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100 text-[#FF6F0F] border border-orange-200 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+            >
+              <Store className="h-3.5 w-3.5" />
+              <span>দোকানের অর্ডারসমূহ</span>
+            </Link>
+          )}
+
           <Link
             href="/my-listings"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100 text-[#FF6F0F] border border-orange-200 text-xs font-bold transition-all shadow-2xs"
@@ -608,6 +619,18 @@ export default function ProfilePage() {
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF6F0F] hover:underline mt-1"
                   >
                     আমার সব বিজ্ঞাপন দেখুন <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    দোকানের অর্ডারসমূহ
+                  </span>
+                  <Link
+                    href="/dashboard/seller/orders"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF6F0F] hover:underline mt-1"
+                  >
+                    দোকানের অর্ডারসমূহ দেখুন <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               </div>
