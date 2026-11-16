@@ -4,12 +4,13 @@
 import { cookies } from "next/headers";
 
 const getAuthBaseUrl = () => {
-  const base =
+  let base =
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "http://localhost:5000/api";
-  const clean = base.replace(/\/+$/, "");
-  return clean.endsWith("/auth") ? clean : `${clean}/auth`;
+    "http://localhost:5000";
+  base = base.replace(/\/+$/, "");
+  const apiBase = base.endsWith("/api") ? base : `${base}/api`;
+  return apiBase.endsWith("/auth") ? apiBase : `${apiBase}/auth`;
 };
 
 /**

@@ -53,11 +53,26 @@ export interface IConversation {
   updatedAt: string;
 }
 
+const getChatBaseUrl = (): string => {
+  const envUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    apiClient.defaults.baseURL ||
+    "http://localhost:5000";
+  const clean = envUrl.replace(/\/+$/, "");
+  return clean.endsWith("/api") ? clean : `${clean}/api`;
+};
+
+// Ensure apiClient baseURL is synchronized
+if (!apiClient.defaults.baseURL) {
+  apiClient.defaults.baseURL = getChatBaseUrl();
+}
+
 /**
  * Normalizes URL path to avoid duplicate '/api' prefix when apiClient baseURL already has '/api'.
  */
 const resolveEndpoint = (path: string): string => {
-  const base = apiClient.defaults.baseURL || "";
+  const base = apiClient.defaults.baseURL || getChatBaseUrl();
   if (base.replace(/\/+$/, "").endsWith("/api") && path.startsWith("/api/")) {
     return path.replace(/^\/api/, "");
   }

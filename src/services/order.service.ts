@@ -2,11 +2,26 @@ import apiClient from "@/lib/axios";
 import { ApiResponse } from "@/types/user.types";
 import { IOrder, CheckoutPayload } from "@/types/order.types";
 
+const getOrderBaseUrl = (): string => {
+  const envUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    apiClient.defaults.baseURL ||
+    "http://localhost:5000";
+  const clean = envUrl.replace(/\/+$/, "");
+  return clean.endsWith("/api") ? clean : `${clean}/api`;
+};
+
+// Ensure apiClient baseURL is synchronized
+if (!apiClient.defaults.baseURL) {
+  apiClient.defaults.baseURL = getOrderBaseUrl();
+}
+
 /**
  * Normalizes URL path to avoid duplicate '/api' prefix when apiClient baseURL already has '/api'.
  */
 const resolveEndpoint = (path: string): string => {
-  const base = apiClient.defaults.baseURL || "";
+  const base = apiClient.defaults.baseURL || getOrderBaseUrl();
   if (base.replace(/\/+$/, "").endsWith("/api") && path.startsWith("/api/")) {
     return path.replace(/^\/api/, "");
   }
