@@ -11,12 +11,15 @@ import {
 import { ApiResponse } from "@/types/user.types";
 
 const getApiBaseUrl = () => {
-  const base =
+  let base =
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "http://localhost:5000/api";
-  const clean = base.replace(/\/+$/, "");
-  return clean.endsWith("/auth") ? clean.replace(/\/auth$/, "") : clean;
+    "http://localhost:5000";
+  base = base.replace(/\/+$/, "");
+  if (base.endsWith("/auth")) {
+    base = base.replace(/\/auth$/, "");
+  }
+  return base.endsWith("/api") ? base : `${base}/api`;
 };
 
 /**

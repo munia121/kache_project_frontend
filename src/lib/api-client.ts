@@ -1,7 +1,16 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/store/useAuthStore";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const getBaseUrl = (): string => {
+  const envUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "http://localhost:5000";
+  const clean = envUrl.replace(/\/+$/, "");
+  return clean.endsWith("/api") ? clean : `${clean}/api`;
+};
+
+const baseURL = getBaseUrl();
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL,
@@ -14,6 +23,9 @@ export const apiClient: AxiosInstance = axios.create({
 // Request Interceptor: Attach JWT Bearer Token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (!config.baseURL) {
+      config.baseURL = getBaseUrl();
+    }
     let token = useAuthStore.getState().token;
 
     if (!token && typeof window !== "undefined") {
